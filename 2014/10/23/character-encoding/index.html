@@ -1,0 +1,554 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="心止在焉">
+    <title>character encoding - 心止在焉</title>
+    <meta name="author" content="Bin Zou">
+    
+    
+        <link rel="alternative" type="application/atom+xml" title="RSS" href="/engineering/atom.xml">
+    
+    <meta name="description" content="介绍字符编码的一些基本概念，以及unicode和utf-8, utf-16, utf-32的基本知识。
+概念character sets一组特定用途的字符形成的集合便是一个字符集（character set）。譬如简体汉字、英文、阿拉伯语等。当然，一个字符集中的字符不限于一门自然语言，可以包含各种字符。譬如unicode字符集，便包含了地球上大部分的自然语言字符。
+coded character">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="character encoding">
+<meta property="og:url" content="http://zoub.in/engineering/2014/10/23/character-encoding/index.html">
+<meta property="og:site_name" content="心止在焉">
+<meta property="og:description" content="介绍字符编码的一些基本概念，以及unicode和utf-8, utf-16, utf-32的基本知识。
+概念character sets一组特定用途的字符形成的集合便是一个字符集（character set）。譬如简体汉字、英文、阿拉伯语等。当然，一个字符集中的字符不限于一门自然语言，可以包含各种字符。譬如unicode字符集，便包含了地球上大部分的自然语言字符。
+coded character">
+<meta property="og:image" content="http://www.w3.org/International/articles/definitions-characters/images/encodings.png">
+<meta property="og:updated_time" content="2016-01-30T09:50:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="character encoding">
+<meta name="twitter:description" content="介绍字符编码的一些基本概念，以及unicode和utf-8, utf-16, utf-32的基本知识。
+概念character sets一组特定用途的字符形成的集合便是一个字符集（character set）。譬如简体汉字、英文、阿拉伯语等。当然，一个字符集中的字符不限于一门自然语言，可以包含各种字符。譬如unicode字符集，便包含了地球上大部分的自然语言字符。
+coded character">
+    
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <!--STYLES END-->
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/engineering/ ">心止在焉</a>
+    </h1>
+    
+</header>
+            <nav id="sidebar" data-behavior="3">
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">Home</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">Categories</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">Tags</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">Archive</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="/engineering/#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">Search</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/#about"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+                    <span class="sidebar-button-desc">About</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            character encoding
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Thu Oct 23 2014 17:53:19 GMT+0800">
+	
+		    Oct 23, 2014
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <p>介绍字符编码的一些基本概念，以及unicode和utf-8, utf-16, utf-32的基本知识。</p>
+<h2 id="概念">概念</h2><h3 id="character_sets">character sets</h3><p>一组特定用途的字符形成的集合便是一个字符集（character set）。譬如简体汉字、英文、阿拉伯语等。当然，一个字符集中的字符不限于一门自然语言，可以包含各种字符。<br>譬如unicode字符集，便包含了地球上大部分的自然语言字符。</p>
+<h3 id="coded_character_sets">coded character sets</h3><p>为了方便计算机处理，通常将一个字符集中所有的字符都一一映射到（编码成）一个数字（code point）。字符集对应的code point集合便是编码字符集（coded character set）。<br>譬如，在编码字符集ISO 8859-1中，code point 233代表字符’é’，但在编码字符集ISO 8859-5中，code point 233代表的是字符’щ’。而在unicode编码字符集同时收录了这两个字符，分别用code point 233, 1097代表。</p>
+<h3 id="character_encodings">character encodings</h3><p>数字在计算机底层可以用多种方式表示。譬如，可用1位’1’表示数字1，也可用两位’01’表示数字1.这个映射，便是字符编码（encoding），即将一个code point编码成一串0, 1。unicode通常的编码方式是utf-8，utf-16，utf-32。</p>
+<h2 id="unicode">unicode</h2><p>code point是一个4到6位的16进制数，以”U+”开头。例如：</p>
+<ul>
+<li>ASCII whitespace: U+0009, U+000A, U+000C, U+000D, and U+0020</li>
+<li>ASCII digits: U+0030 to U+0039</li>
+<li>A-Z: U+0041 to U+005A</li>
+<li>a-z: U+0061 to U+007A</li>
+</ul>
+<p>对unicode中的code point有三种常见的编码：utf-8, utf-16, utf-32，如下图（来自<a href="http://www.w3.org/International/articles/definitions-characters/" target="_blank" rel="external">这里</a>）：</p>
+<p><img src="http://www.w3.org/International/articles/definitions-characters/images/encodings.png" alt="unicode encodings"></p>
+<h3 id="utf-8">utf-8</h3><p>uft-8是一种变长的字符编码，即每一个code point在计算机里面的表示长度都不尽相同。具体见下表。</p>
+<table>
+<thead>
+<tr>
+<th>Bits</th>
+<th>lowest</th>
+<th>highest</th>
+<th>Bytes</th>
+<th>Byte 1</th>
+<th>Byte 2</th>
+<th>Byte 3</th>
+<th>Byte 4</th>
+<th>Byte 5</th>
+<th>Byte 6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7</td>
+<td>U+0000</td>
+<td>U+007F</td>
+<td>1</td>
+<td>0xxxxxxx</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td>U+0080</td>
+<td>U+07FF</td>
+<td>2</td>
+<td>110xxxxx</td>
+<td>10xxxxxx</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>16</td>
+<td>U+0800</td>
+<td>U+FFFF</td>
+<td>3</td>
+<td>1110xxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>21</td>
+<td>U+10000</td>
+<td>U+1FFFF</td>
+<td>4</td>
+<td>11110xxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>26</td>
+<td>U+200000</td>
+<td>U+3FFFFF</td>
+<td>5</td>
+<td>111110xx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td></td>
+</tr>
+<tr>
+<td>31</td>
+<td>U+4000000</td>
+<td>U+7FFFFF</td>
+<td>6</td>
+<td>1111110x</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+</tr>
+</tbody>
+</table>
+<p>utf-8将比特流逐个字节解析，且解析出的字节可分成single bytes, leading bytes, continuation bytes三种。这三种字节表示的数值范围没有交集，因而可立即判断该如何解析。以下是更具体的特征：</p>
+<ul>
+<li>ASCII中0到127对应的字符用single bytes，以0开头</li>
+<li>高于127的code points用多个字节表示，首字节为leading byte, 其余为continuation byte</li>
+<li>leading byte高位上连续有两个以上的1，且其数目与该编码使用的字节数一样</li>
+<li>continuation byte高位为10</li>
+</ul>
+<p>在2003年，<a href="http://tools.ietf.org/html/rfc3629" target="_blank" rel="external">RFC 3629</a>规定utf-8最多编码到U+10FFFF。见<a href="http://en.wikipedia.org/wiki/Utf-8" target="_blank" rel="external">维基百科</a>。</p>
+<h3 id="utf-16">utf-16</h3><p>与utf-8一样，是变长编码。常见的code point都用16位进行编码，其它的可能会占用更多的字节。见<a href="http://en.wikipedia.org/wiki/Utf-16" target="_blank" rel="external">维基百科</a>。</p>
+<h3 id="utf-32">utf-32</h3><p>与utf-8和utf-16不一样，是定长编码，所有code point都用32位进行编码。见<a href="http://en.wikipedia.org/wiki/Utf-32" target="_blank" rel="external">维基百科</a>。</p>
+<h2 id="How_to_choose_a_character_encoding?">How to choose a character encoding?</h2><p>要想浏览器能正确解码收到的字节流，需要在编辑时将数据保存为一种编码A，服务器在提供内容时在header中指定文件类型（Content-Type）。都用utf-8可以保持最大的兼容性。</p>
+<h2 id="推荐教程">推荐教程</h2><ul>
+<li><a href="http://www.w3.org/International/tutorials/tutorial-char-enc/" target="_blank" rel="external">http://www.w3.org/International/tutorials/tutorial-char-enc/</a></li>
+<li><a href="http://www.w3.org/International/questions/qa-what-is-encoding" target="_blank" rel="external">http://www.w3.org/International/questions/qa-what-is-encoding</a></li>
+<li><a href="http://www.w3.org/International/questions/qa-choosing-encodings" target="_blank" rel="external">http://www.w3.org/International/questions/qa-choosing-encodings</a></li>
+<li><a href="http://www.w3.org/International/articles/definitions-characters/" target="_blank" rel="external">http://www.w3.org/International/articles/definitions-characters/</a></li>
+</ul>
+<h2 id="更多参考">更多参考</h2><ul>
+<li><a href="http://encoding.spec.whatwg.org/" target="_blank" rel="external">http://encoding.spec.whatwg.org/</a></li>
+<li><a href="http://www.unicode.org/versions/Unicode6.3.0/" target="_blank" rel="external">http://www.unicode.org/versions/Unicode6.3.0/</a></li>
+<li><a href="http://www.unicode.org/standard/principles.html" target="_blank" rel="external">http://www.unicode.org/standard/principles.html</a></li>
+</ul>
+<h3 id="utf-8_related">utf-8 related</h3><ul>
+<li><a href="http://www.ietf.org/rfc/rfc3629.txt" target="_blank" rel="external">http://www.ietf.org/rfc/rfc3629.txt</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Utf-8" target="_blank" rel="external">http://en.wikipedia.org/wiki/Utf-8</a></li>
+<li><a href="http://www.cl.cam.ac.uk/~mgk25/ucs/ISO-10646-UTF-8.html" target="_blank" rel="external">http://www.cl.cam.ac.uk/~mgk25/ucs/ISO-10646-UTF-8.html</a></li>
+<li><a href="http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8" target="_blank" rel="external">http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8</a></li>
+</ul>
+<h3 id="more">more</h3><ul>
+<li><a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html" target="_blank" rel="external">http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html</a></li>
+</ul>
+<h3 id="Tools">Tools</h3><ul>
+<li><a href="http://www.decodeunicode.org/" target="_blank" rel="external">http://www.decodeunicode.org/</a></li>
+</ul>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/engineering/tags/basics/">basics</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/01/cheat-sheet-mac-os-keyboard-shortcuts/"  data-tooltip="cheat sheet - mac os keyboard shortcuts">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Bin Zou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/01/cheat-sheet-mac-os-keyboard-shortcuts/"  data-tooltip="cheat sheet - mac os keyboard shortcuts">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/10/23/character-encoding/">
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        <div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <h4 id="about-card-name">Bin Zou</h4>
+        
+            <h5 id="about-card-bio"><p><img src="https://avatars1.githubusercontent.com/u/2097644?v=3&amp;s=100" alt="avatar"></p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Frontend Engineer</p>
+
+            </h5>
+        
+        
+    </div>
+</div>
+
+        <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<!--SCRIPTS END-->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'zoubin';
+        (function() {
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
+
+    <script type="text/javascript">
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+                (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+            e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','JrgMusyGYH38rsYxCTiq','2.0.0');
+    </script>
+
+
+</html>

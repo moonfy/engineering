@@ -1,0 +1,714 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="心止在焉">
+    <title>command mode in vim - 心止在焉</title>
+    <meta name="author" content="Bin Zou">
+    
+    
+        <link rel="alternative" type="application/atom+xml" title="RSS" href="/engineering/atom.xml">
+    
+    <meta name="description" content="ex Commands
+
+
+command
+meaning
+
+
+
+
+d
+Delete lines
+
+
+m
+Move lines
+
+
+co
+Copy lines
+
+
+t
+Copy lines (a synonym forco)
+
+
+
+指定操作的行范围
+
+
+命令形式
+含义
+
+
+
+
+
+直接使用数字
+
+
+:3,18d
+删除3到18行
+
+
+:3,18m100
+将3到18行移动到第100行后，相当于d再p">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="command mode in vim">
+<meta property="og:url" content="http://zoub.in/engineering/2014/11/05/command-mode-in-vim/index.html">
+<meta property="og:site_name" content="心止在焉">
+<meta property="og:description" content="ex Commands
+
+
+command
+meaning
+
+
+
+
+d
+Delete lines
+
+
+m
+Move lines
+
+
+co
+Copy lines
+
+
+t
+Copy lines (a synonym forco)
+
+
+
+指定操作的行范围
+
+
+命令形式
+含义
+
+
+
+
+
+直接使用数字
+
+
+:3,18d
+删除3到18行
+
+
+:3,18m100
+将3到18行移动到第100行后，相当于d再p">
+<meta property="og:updated_time" content="2016-01-30T09:50:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="command mode in vim">
+<meta name="twitter:description" content="ex Commands
+
+
+command
+meaning
+
+
+
+
+d
+Delete lines
+
+
+m
+Move lines
+
+
+co
+Copy lines
+
+
+t
+Copy lines (a synonym forco)
+
+
+
+指定操作的行范围
+
+
+命令形式
+含义
+
+
+
+
+
+直接使用数字
+
+
+:3,18d
+删除3到18行
+
+
+:3,18m100
+将3到18行移动到第100行后，相当于d再p">
+    
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <!--STYLES END-->
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/engineering/ ">心止在焉</a>
+    </h1>
+    
+</header>
+            <nav id="sidebar" data-behavior="3">
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">Home</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">Categories</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">Tags</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">Archive</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="/engineering/#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">Search</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/#about"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+                    <span class="sidebar-button-desc">About</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            command mode in vim
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Wed Nov 05 2014 19:09:19 GMT+0800">
+	
+		    Nov 05, 2014
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <h2 id="ex_Commands">ex Commands</h2><table>
+<thead>
+<tr>
+<th>command</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d</td>
+<td>Delete lines</td>
+</tr>
+<tr>
+<td>m</td>
+<td>Move lines</td>
+</tr>
+<tr>
+<td>co</td>
+<td>Copy lines</td>
+</tr>
+<tr>
+<td>t</td>
+<td>Copy lines (a synonym forco)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="指定操作的行范围">指定操作的行范围</h3><table>
+<thead>
+<tr>
+<th>命令形式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>直接使用数字</td>
+</tr>
+<tr>
+<td>:3,18d</td>
+<td>删除3到18行</td>
+</tr>
+<tr>
+<td>:3,18m100</td>
+<td>将3到18行移动到第100行后，相当于d再p</td>
+</tr>
+<tr>
+<td>:3,18t100</td>
+<td>将3到18行复制到第100行后，相当于y再p</td>
+</tr>
+<tr>
+<td></td>
+<td>使用相对当前行号的符号</td>
+</tr>
+<tr>
+<td>:.,$d</td>
+<td>删除当前行到最后一行</td>
+</tr>
+<tr>
+<td>:%d</td>
+<td>删除所有行</td>
+</tr>
+<tr>
+<td>:3,.m100</td>
+<td>将3到当前行移动到第100行后</td>
+</tr>
+<tr>
+<td>:%t$</td>
+<td>复制所有行，添加到末尾</td>
+</tr>
+<tr>
+<td>:.,+20d</td>
+<td>删除当前行及接下来的20行</td>
+</tr>
+<tr>
+<td>:20,$m.-2</td>
+<td>将20行以后的内容移动到当前行往上的两行位置</td>
+</tr>
+<tr>
+<td>:-,+t0</td>
+<td>复制当前行上下共三行到文件顶部（1表示第1行）</td>
+</tr>
+<tr>
+<td></td>
+<td>使用搜索：<code>/pattern/</code>可表示行号。</td>
+</tr>
+<tr>
+<td>:/pattern/d</td>
+<td>删除下一处pattern所在的行</td>
+</tr>
+<tr>
+<td>:/pattern/+d</td>
+<td>删除下一处pattern所在行的下一行</td>
+</tr>
+<tr>
+<td>:/pattern1/,/pattern2/d</td>
+<td>删除下一处pattern1所在行到下一处pattern2所在行</td>
+</tr>
+<tr>
+<td>:.,/pattern/m23</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>d/pattern</code></td>
+<td>删除从当前位置到pattern所在位置前的所有字符。</td>
+</tr>
+<tr>
+<td><code>:.,/pattern/d</code></td>
+<td>删除从当前行到pattern所在行。注意与<code>d/pattern</code>的区别</td>
+</tr>
+<tr>
+<td></td>
+<td>使用分号修改相对行号的含义</td>
+</tr>
+<tr>
+<td><code>100,+6d</code></td>
+<td>删除100行到当前行以下的第6行。</td>
+</tr>
+<tr>
+<td><code>100;+6d</code></td>
+<td>删除100行到106行。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="搜索">搜索</h3><p><code>:g</code>可以进行全局搜索。</p>
+<table>
+<thead>
+<tr>
+<th>命令形式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:g/pattern</td>
+<td>查找（并移动）到最后一处pattern</td>
+</tr>
+<tr>
+<td>:g/pattern/p</td>
+<td>查找并展示所有pattern所在的行</td>
+</tr>
+<tr>
+<td>:g!/pattern/nu</td>
+<td>查找并展示所有pattern不在的行，并展示行号</td>
+</tr>
+<tr>
+<td>:60,120g/pattern/p</td>
+<td>在60到120行中查找并展示所有pattern在的行</td>
+</tr>
+</tbody>
+</table>
+<p><code>:g</code>可以和<code>:s</code>，<code>:d</code>，<code>:mo</code>，<code>:co</code>组合使用。</p>
+<table>
+<thead>
+<tr>
+<th>命令形式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:g/pattern/s/old/new/g</code></td>
+<td>在所有含有pattern的行上执行<code>s/old/new/g</code></td>
+</tr>
+<tr>
+<td><code>:g/pattern/s//new/g</code></td>
+<td>即<code>:g/pattern/s/pattern/new/g</code>或<code>%s/pattern/new/g</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="其它">其它</h3><h4 id="多条命令组合">多条命令组合</h4><p>可以用<code>|</code>来在同一行执行多条命令，相当于shell中的<code>;</code>。</p>
+<h4 id="添加到文件末尾">添加到文件末尾</h4><figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:<span class="number">300</span>,<span class="variable">$w</span>&gt;&gt;filename</span><br></pre></td></tr></table></figure>
+<h4 id="读取文件内容">读取文件内容</h4><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">:r</span> file</span><br><span class="line"><span class="symbol">:</span><span class="number">30</span>r file</span><br><span class="line"><span class="symbol">:</span><span class="variable">$r</span> file</span><br><span class="line"><span class="symbol">:</span>0r file</span><br><span class="line"><span class="symbol">:/pattern/r</span> file</span><br></pre></td></tr></table></figure>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/engineering/tags/vim/">vim</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/04/10/random-numbers/"  data-tooltip="一个随机数生成问题">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/03/motion-in-vim/" data-tooltip="motion in vim">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Bin Zou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/04/10/random-numbers/"  data-tooltip="一个随机数生成问题">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/03/motion-in-vim/" data-tooltip="motion in vim">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        <div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <h4 id="about-card-name">Bin Zou</h4>
+        
+            <h5 id="about-card-bio"><p><img src="https://avatars1.githubusercontent.com/u/2097644?v=3&amp;s=100" alt="avatar"></p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Frontend Engineer</p>
+
+            </h5>
+        
+        
+    </div>
+</div>
+
+        <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<!--SCRIPTS END-->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'zoubin';
+        (function() {
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
+
+    <script type="text/javascript">
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+                (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+            e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','JrgMusyGYH38rsYxCTiq','2.0.0');
+    </script>
+
+
+</html>

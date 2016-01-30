@@ -1,0 +1,614 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="心止在焉">
+    <title>css layout - 心止在焉</title>
+    <meta name="author" content="Bin Zou">
+    
+    
+        <link rel="alternative" type="application/atom+xml" title="RSS" href="/engineering/atom.xml">
+    
+    <meta name="description" content="Table of ContentsVisual Formatting ModelViewportContaining blockInitial containing blockBox type‘display’Computed ‘display’Positioning schemesNormal flowBlock formatting contextExamplesExamplesInline">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="css layout">
+<meta property="og:url" content="http://zoub.in/engineering/2015/09/02/css-layout/index.html">
+<meta property="og:site_name" content="心止在焉">
+<meta property="og:description" content="Table of ContentsVisual Formatting ModelViewportContaining blockInitial containing blockBox type‘display’Computed ‘display’Positioning schemesNormal flowBlock formatting contextExamplesExamplesInline">
+<meta property="og:image" content="http://zoub.in/engineering/containing-block.png">
+<meta property="og:image" content="http://zoub.in/engineering/box-type.png">
+<meta property="og:image" content="http://zoub.in/engineering/computed-display.png">
+<meta property="og:image" content="http://zoub.in/engineering/inline-box.png">
+<meta property="og:image" content="http://zoub.in/engineering/vertical-align.png">
+<meta property="og:image" content="https://drafts.csswg.org/css-position/images/stack.png">
+<meta property="og:image" content="http://zoub.in/engineering/z-index.png">
+<meta property="og:updated_time" content="2016-01-30T09:50:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="css layout">
+<meta name="twitter:description" content="Table of ContentsVisual Formatting ModelViewportContaining blockInitial containing blockBox type‘display’Computed ‘display’Positioning schemesNormal flowBlock formatting contextExamplesExamplesInline">
+    
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <!--STYLES END-->
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/engineering/ ">心止在焉</a>
+    </h1>
+    
+</header>
+            <nav id="sidebar" data-behavior="3">
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">Home</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">Categories</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">Tags</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">Archive</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="/engineering/#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">Search</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/#about"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+                    <span class="sidebar-button-desc">About</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            css layout
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Wed Sep 02 2015 18:16:13 GMT+0800">
+	
+		    Sep 02, 2015
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <h1 id="table-of-contents">Table of Contents</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Visual_Formatting_Model"><span class="toc-text">Visual Formatting Model</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Viewport"><span class="toc-text">Viewport</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Containing_block"><span class="toc-text">Containing block</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Initial_containing_block"><span class="toc-text">Initial containing block</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Box_type"><span class="toc-text">Box type</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#‘display’"><span class="toc-text">‘display’</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Computed_‘display’"><span class="toc-text">Computed ‘display’</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Positioning_schemes"><span class="toc-text">Positioning schemes</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Normal_flow"><span class="toc-text">Normal flow</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Block_formatting_context"><span class="toc-text">Block formatting context</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Examples"><span class="toc-text">Examples</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Examples-1"><span class="toc-text">Examples</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Inline_formatting_contexts"><span class="toc-text">Inline formatting contexts</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Line_height_calculations"><span class="toc-text">Line height calculations</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Example"><span class="toc-text">Example</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Relative_positioning"><span class="toc-text">Relative positioning</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Floats"><span class="toc-text">Floats</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#浮动的特点"><span class="toc-text">浮动的特点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#对其它元素的影响"><span class="toc-text">对其它元素的影响</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#浮动元素的outer_edge受其containing_block的限制"><span class="toc-text">浮动元素的outer edge受其containing block的限制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#浮动元素之间可能互相限制"><span class="toc-text">浮动元素之间可能互相限制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#受前面元素的限制"><span class="toc-text">受前面元素的限制</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Example-1"><span class="toc-text">Example</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#清除浮动"><span class="toc-text">清除浮动</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Absolute_positioning"><span class="toc-text">Absolute positioning</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Example-2"><span class="toc-text">Example</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Fixed_positioning"><span class="toc-text">Fixed positioning</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Layered_presentation"><span class="toc-text">Layered presentation</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Stacking_context"><span class="toc-text">Stacking context</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Example-3"><span class="toc-text">Example</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#z-index"><span class="toc-text">z-index</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#More_info"><span class="toc-text">More info</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sizing_and_positioning_details"><span class="toc-text">Sizing and positioning details</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Definitions"><span class="toc-text">Definitions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#out_of_flow"><span class="toc-text">out of flow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#in_flow"><span class="toc-text">in flow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#flow"><span class="toc-text">flow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#positioned_element/box"><span class="toc-text">positioned element/box</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#More"><span class="toc-text">More</span></a></li></ol>
+<h2 id="Visual_Formatting_Model">Visual Formatting Model</h2><blockquote>
+<p>In the visual formatting model, each element in the document tree generates zero or more boxes according to the box model.</p>
+</blockquote>
+<p>The layout of these boxes is governed by:</p>
+<ul>
+<li>box dimensions and type.</li>
+<li>positioning scheme (normal flow, float, and absolute positioning).</li>
+<li>relationships between elements in the document tree.</li>
+<li>external information (e.g., viewport size, intrinsic dimensions of images, etc.).</li>
+</ul>
+<h2 id="Viewport">Viewport</h2><blockquote>
+<p>User agents for continuous media generally offer users a viewport (a window or other viewing area on the screen) through which users consult a document.</p>
+</blockquote>
+<h2 id="Containing_block">Containing block</h2><blockquote>
+<p>The position and size of an element’s box(es) are sometimes calculated relative to a certain rectangle, called the containing block of the element.</p>
+</blockquote>
+<p><img src="containing-block.png" alt="containing-block"></p>
+<h3 id="Initial_containing_block">Initial containing block</h3><blockquote>
+<p>The containing block in which the root element lives is a rectangle called the initial containing block</p>
+<p>it has the dimensions of the viewport and is anchored at the canvas origin</p>
+</blockquote>
+<h2 id="Box_type">Box type</h2><blockquote>
+<p>Block-level boxes are boxes that participate in a block formatting context.</p>
+<p>An inline box is one that is both inline-level and whose contents participate in its containing inline formatting context.</p>
+</blockquote>
+<p>一个元素一般会产生一个盒子，有些情况下会产生多个（如list-item），但用于定位的一定是其中的主盒子（principal box）。可见，元素的类型会影响其生成的盒子类型。</p>
+<p>如果一个元素在渲染后总是形成一个新的内容块（block），则称其为块级元素(block-level element)，如<code>p</code>, <code>div</code>等（假设无css修改样式）。</p>
+<p>如果一个元素的内容可能分布在多行，则称其为行内元素（inline-level element），如<code>span</code>, <code>em</code>等。</p>
+<p>另外，就盒子中的内容而言，如果全是块级盒子，或者该盒子创建了一个IFC (inline formatting context)，则称其为block container box。譬如常见的<code>div</code>, <code>p</code>, <code>inline-block</code>。</p>
+<p>除table box，replaced box外，block-level box都是block container box，也被称为block box。而inline-level box中non-replaced inline-block和non-replaced table-cell是block container box。</p>
+<h3 id="‘display’">‘display’</h3><p>主要影响盒子类型的还是<code>display</code>属性。因此，我们可以通过将一个<code>span</code>的<code>display</code>设为<code>block</code>而将其渲染成块级元素的样子。</p>
+<p><img src="box-type.png" alt="box-type"></p>
+<h3 id="Computed_‘display’">Computed ‘display’</h3><p><a href="https://drafts.csswg.org/css-position/#dis-pos-flo" target="_blank" rel="external">Relationships between display, position, and float</a></p>
+<p><img src="computed-display.png" alt="computed-display"></p>
+<h2 id="Positioning_schemes">Positioning schemes</h2><p>CSS2.1中有三种定位方式：</p>
+<ol>
+<li>正常流（normal flow）</li>
+<li>浮动（floats）</li>
+<li>绝对定位（absolute positioning）</li>
+</ol>
+<p>可以通过<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-position" target="_blank" rel="external">‘position’</a>属性以及<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-float" target="_blank" rel="external">‘float’</a>属性来选择使用哪种定位。</p>
+<h2 id="Normal_flow">Normal flow</h2><blockquote>
+<p>In CSS, normal flow includes block formatting of block-level boxes, inline formatting of inline-level boxes, and relative and sticky positioning of block-level and inline-level boxes.</p>
+<p>Boxes in the normal flow belong to a formatting context, which may be block or inline, but not both simultaneously</p>
+</blockquote>
+<p>正常流排列盒子的方式有两种：横排(horizontal)和竖排(vertical)。</p>
+<ul>
+<li><a href="https://jsbin.com/lepayu/edit?html,css,output" target="_blank" rel="external">正常流中的横排与竖排</a></li>
+</ul>
+<h3 id="Block_formatting_context">Block formatting context</h3><p>竖排的盒子总是独占一行，被称为块级盒子(block-level box)。排列在一起的块级盒子所占用的空间称为block formatting context (BFC)。也可以说，用来竖排块级盒子的空间就是BFC。</p>
+<p>BFC中盒子的排列特点：</p>
+<ol>
+<li>盒子独占一行，从包含块(containing block)的顶部开始向下垂直分布。</li>
+<li>每个盒子的left margin-edge (left outer-edge)总是与包含块的左边接邻。</li>
+<li>兄弟盒子（sibling boxes）间的垂直距离取决于<code>margin</code>属性。垂直方向上相邻的<code>margin</code>遵循margin-collapse规则。</li>
+</ol>
+<h4 id="Examples">Examples</h4><ul>
+<li><a href="https://jsbin.com/cugowe/1/edit?html,css,output" target="_blank" rel="external">BFC中盒子的垂直排列</a></li>
+<li><a href="https://jsbin.com/satogu/edit?html,css,output" target="_blank" rel="external">BFC中盒子的外沿</a></li>
+</ul>
+<p>以下元素会创建BFC:</p>
+<ul>
+<li>floats</li>
+<li>absolute positioned elements</li>
+<li>block containers (such as inline-blocks, table-cells, and table-captions) that are not block boxes</li>
+<li>block boxes with ‘overflow’ other than ‘visible’</li>
+</ul>
+<p>创建了BFC的盒子拥有的特性：</p>
+<ul>
+<li>内部BFC中的文本排列不受外部浮动元素的影响。</li>
+<li>不与子元素发生margin collapse.</li>
+<li>盒子的高度计算时包括了该BFC中的浮动元素。</li>
+</ul>
+<h4 id="Examples-1">Examples</h4><ul>
+<li><a href="https://jsbin.com/satogu/edit?html,css,output" target="_blank" rel="external">BFC中文本与外部浮动</a></li>
+<li><a href="https://jsbin.com/cugowe/edit?html,css,output" target="_blank" rel="external">BFC创建者与后代元素的margin collapse</a></li>
+</ul>
+<h3 id="Inline_formatting_contexts">Inline formatting contexts</h3><blockquote>
+<p>In an inline formatting context, boxes are laid out horizontally, one after the other, beginning at the top of a containing block.</p>
+</blockquote>
+<p>由block container box创建，用于排列inline-level box。其重要的特性是横向一行一行的排，每行的高度由各元素的<code>vertical-align</code>和<code>line-height</code>决定。</p>
+<p>需要注意的是，用于行内排列的盒子并非盒模型确定的盒子。</p>
+<p><img src="inline-box.png" alt="inline-box"></p>
+<h4 id="Line_height_calculations">Line height calculations</h4><blockquote>
+<p>user agents flow inline-level boxes into a vertical stack of line boxes</p>
+</blockquote>
+<p>行高的确定步骤：</p>
+<ol>
+<li>计算当前行中所有inline-level box的高度。即其<a href="http://www.w3.org/TR/CSS2/visudet.html#line-height" target="_blank" rel="external">line-height</a></li>
+<li>根据每个inline-level box的<a href="http://www.w3.org/TR/CSS2/visudet.html#propdef-vertical-align" target="_blank" rel="external">vertical-align</a>属性在垂直方向上排列</li>
+<li>行高即所有盒子中最靠上的边与最靠下的边的距离。</li>
+</ol>
+<p><img src="vertical-align.png" alt="vertical-align"></p>
+<p><strong>NOTE</strong>: 行高只与line-height和vertical-align有关，与盒子的maring, padding, border, height等无关。</p>
+<h4 id="Example">Example</h4><ul>
+<li><a href="https://jsbin.com/nuyeke/edit?html,css,output" target="_blank" rel="external">vertical-align与line-height对行高的影响</a></li>
+</ul>
+<h3 id="Relative_positioning">Relative positioning</h3><p>在盒子按正常流的方式定位好后，可以使用<code>position:relative</code>进行偏移。</p>
+<p>这里重要的点是：</p>
+<ol>
+<li>盒子是相对其在正常流中的位置进行偏移。</li>
+<li>其它元素的定位不受该盒子偏移影响。但可能会有重叠现象发生。</li>
+</ol>
+<h2 id="Floats">Floats</h2><blockquote>
+<p>In the float model, a box is first laid out according to the normal flow, then taken out of the flow and positioned, typically to the left or right. Content may flow along the side of a float.</p>
+<p>The border box of a table, a block-level replaced element, or an element in the normal flow that establishes a new block formatting context (such as an element with ‘overflow’ other than ‘visible’) must not overlap the margin box of any floats in the same block formatting context as the element itself.</p>
+</blockquote>
+<p>浮动，即将盒子移动到当前行的最左或最右的位置。</p>
+<h3 id="浮动的特点">浮动的特点</h3><p>详细的浮动说明见<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-float" target="_blank" rel="external">‘float’</a>属性说明。</p>
+<h4 id="对其它元素的影响">对其它元素的影响</h4><ul>
+<li>其它元素的定位会忽略浮动元素的存在</li>
+<li>行宽要为浮动元素的margin box挪空间而变短，但盒子的宽度不变。</li>
+<li>创建了BFC的盒子其border box不能与所在BFC中浮动元素的margin box有交叠，因此其宽度可能变短。</li>
+</ul>
+<h4 id="浮动元素的outer_edge受其containing_block的限制">浮动元素的outer edge受其containing block的限制</h4><ul>
+<li>浮动元素的margin box不能伸出其containing block的上边、左边、右边。</li>
+<li>尽可能靠上</li>
+<li>左浮动元素尽可能地靠左</li>
+<li>右浮动元素尽可能地靠右</li>
+</ul>
+<h4 id="浮动元素之间可能互相限制">浮动元素之间可能互相限制</h4><ul>
+<li>左浮动元素必须在前面左浮动元素的右边或下边。</li>
+<li>右浮动元素必须在前面右浮动元素的左边或下边。</li>
+<li>左浮动元素必须在相邻右浮动元素的左边。</li>
+<li>右浮动元素必须在相邻左浮动元素的右边。</li>
+</ul>
+<h4 id="受前面元素的限制">受前面元素的限制</h4><ul>
+<li>不能比文档中在前的block (block-level box, block container)、浮动元素更靠上</li>
+<li>不能比文档中在前的line box更靠上</li>
+</ul>
+<h5 id="Example-1">Example</h5><ul>
+<li><a href="https://jsbin.com/hivafo/edit?html,css,output" target="_blank" rel="external">float与前后元素</a></li>
+</ul>
+<h3 id="清除浮动">清除浮动</h3><p>浮动带来的效果：</p>
+<ol>
+<li>文本可能绕图片排列，不呈现矩形块状。</li>
+<li>父元素高度的计算可能不包括浮动元素的高度，出现塌陷现象。</li>
+<li>创建了BFC的盒子，其border box可能变窄。</li>
+</ol>
+<p>一般说clear a float，指的是使clear space for the target element，即让目标元素和浮动元素保持一定距离以免受上述效果。</p>
+<p>可使用<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-clear" target="_blank" rel="external">clear</a>属性来达到目的。另外，使某些元素创建BFC也能达到某些效果。</p>
+<h2 id="Absolute_positioning">Absolute positioning</h2><blockquote>
+<p>In the absolute positioning model, a box is removed from the normal flow entirely (it has no impact on later siblings) and assigned a position with respect to a containing block.</p>
+</blockquote>
+<p>绝对定位的元素彻底脱离了正常流，完全不影响原来流的layout。</p>
+<p>绝对定位的元素创建了BFC，形成一个新的正常流。</p>
+<p>可通过<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-position" target="_blank" rel="external">position</a>属性来指定绝对定位。</p>
+<p><strong>NOTE</strong>: 绝对定位盒子的containing block是最近的祖先positioned box的padding edge（如果该祖先盒子为block-level）.</p>
+<h3 id="Example-2">Example</h3><ul>
+<li><a href="https://jsbin.com/nakeha/edit?html,css,output" target="_blank" rel="external">绝对定位的top与left含义</a></li>
+</ul>
+<h3 id="Fixed_positioning">Fixed positioning</h3><blockquote>
+<p>Fixed positioning is a subcategory of absolute positioning.</p>
+</blockquote>
+<p>与绝对定位唯一的差别在于fixed positioning的元素，其containing block是由viewport创建的。即元素相对于视口定位。</p>
+<h2 id="Layered_presentation">Layered presentation</h2><p><img src="https://drafts.csswg.org/css-position/images/stack.png" alt="stack"></p>
+<p>CSS中每个盒子都有一个三维的位置信息，前面的定位机制都是指定了二维的信息（x-y平面）。</p>
+<p>如果元素的<code>position</code>属性值不为<code>static</code>，则称其为<code>positioned element</code>，其产生的盒子称为<code>positioned box</code>。</p>
+<p>使用相对定位或绝对定位可能出现盒子重叠的情况，此时可以使用<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-z-index" target="_blank" rel="external">z-index</a>来指定stack level（哪个在上）。这便是第三维的位置信息。</p>
+<h3 id="Stacking_context">Stacking context</h3><p>根元素或<code>z-index</code>为<code>auto</code>的元素会创建一个stacking context。</p>
+<p>该元素的后代元素（如果它们不新建stacking context的话）都存在于该stacking context中，通过stacking level（即各自的<code>z-index</code>的值）来决定谁前谁后。</p>
+<p><strong>NOTE</strong>: z-index的比较只对同一个stacking context中的元素起作用。当两个元素处于不同的stacking context中时，必须找到它们处于同一个stacking context中的祖先，由其祖先的z-index决定谁前谁后。所以，这是一个拼爹的属性。</p>
+<h4 id="Example-3">Example</h4><ul>
+<li><a href="https://jsbin.com/tibami/edit?html,css,output" target="_blank" rel="external">z-index的作用是要拼爹的</a></li>
+</ul>
+<h3 id="z-index">z-index</h3><ul>
+<li><code>z-index</code>只对positioned element有效果</li>
+<li><code>z-index</code>用于指定stack-level</li>
+<li><code>z-index</code>用于创建stacking context</li>
+</ul>
+<p><img src="z-index.png" alt="z-index"></p>
+<h3 id="More_info">More info</h3><ul>
+<li><a href="https://drafts.csswg.org/css-position/#layered-presentation" target="_blank" rel="external">https://drafts.csswg.org/css-position/#layered-presentation</a></li>
+</ul>
+<h2 id="Sizing_and_positioning_details">Sizing and positioning details</h2><p>See <a href="https://drafts.csswg.org/css-position-3/#size-and-position-details" target="_blank" rel="external">here</a></p>
+<h2 id="Definitions">Definitions</h2><h3 id="out_of_flow">out of flow</h3><blockquote>
+<p>An element is called out of flow if it is floated, absolutely positioned, or is the root element.</p>
+</blockquote>
+<h3 id="in_flow">in flow</h3><blockquote>
+<p>An element is called in-flow if it is not out-of-flow.</p>
+</blockquote>
+<h3 id="flow">flow</h3><blockquote>
+<p>The flow of an element A is the set consisting of A and all in-flow elements whose nearest out-of-flow ancestor is A.</p>
+</blockquote>
+<h3 id="positioned_element/box">positioned element/box</h3><blockquote>
+<p>An element is said to be positioned if its position property has a value other than static.</p>
+<p>Positioned elements generate positioned boxes</p>
+</blockquote>
+<h2 id="More">More</h2><ul>
+<li><a href="http://www.w3.org/TR/CSS2/visuren.html" target="_blank" rel="external">http://www.w3.org/TR/CSS2/visuren.html</a></li>
+<li><a href="https://drafts.csswg.org/css-position/" target="_blank" rel="external">https://drafts.csswg.org/css-position/</a></li>
+<li><a href="https://drafts.csswg.org/css-display/" target="_blank" rel="external">https://drafts.csswg.org/css-display/</a></li>
+<li><a href="https://drafts.csswg.org/css-inline/" target="_blank" rel="external">https://drafts.csswg.org/css-inline/</a></li>
+<li><a href="https://drafts.csswg.org/css-flexbox/" target="_blank" rel="external">https://drafts.csswg.org/css-flexbox/</a></li>
+<li><a href="https://drafts.csswg.org/css-align/" target="_blank" rel="external">https://drafts.csswg.org/css-align/</a></li>
+<li><a href="https://drafts.csswg.org/css-overflow/" target="_blank" rel="external">https://drafts.csswg.org/css-overflow/</a></li>
+</ul>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/engineering/tags/css/">css</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/09/02/css-cascading/"  data-tooltip="css cascading">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/04/10/random-numbers/" data-tooltip="一个随机数生成问题">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Bin Zou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/09/02/css-cascading/"  data-tooltip="css cascading">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/04/10/random-numbers/" data-tooltip="一个随机数生成问题">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/09/02/css-layout/">
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        <div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <h4 id="about-card-name">Bin Zou</h4>
+        
+            <h5 id="about-card-bio"><p><img src="https://avatars1.githubusercontent.com/u/2097644?v=3&amp;s=100" alt="avatar"></p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Frontend Engineer</p>
+
+            </h5>
+        
+        
+    </div>
+</div>
+
+        <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<!--SCRIPTS END-->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'zoubin';
+        (function() {
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
+
+    <script type="text/javascript">
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+                (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+            e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','JrgMusyGYH38rsYxCTiq','2.0.0');
+    </script>
+
+
+</html>

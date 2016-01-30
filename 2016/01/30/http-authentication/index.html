@@ -1,0 +1,530 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="心止在焉">
+    <title>http authentication - 心止在焉</title>
+    <meta name="author" content="Bin Zou">
+    
+    
+        <link rel="alternative" type="application/atom+xml" title="RSS" href="/engineering/atom.xml">
+    
+    <meta name="description" content="《HTTP: The Definitive Guide》阅读笔记。
+
+Authentication means showing some proof of your identify.
+
+当用户访问某些隐私信息时，需要用户提供身份证明，通常就是填写用户名和密码。
+Basic Authentication
+
+用户请求/family/jeff.jpg
+服务器响应401，要求进行basic authen">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="http authentication">
+<meta property="og:url" content="http://zoub.in/engineering/2016/01/30/http-authentication/index.html">
+<meta property="og:site_name" content="心止在焉">
+<meta property="og:description" content="《HTTP: The Definitive Guide》阅读笔记。
+
+Authentication means showing some proof of your identify.
+
+当用户访问某些隐私信息时，需要用户提供身份证明，通常就是填写用户名和密码。
+Basic Authentication
+
+用户请求/family/jeff.jpg
+服务器响应401，要求进行basic authen">
+<meta property="og:image" content="http://zoub.in/engineering/basic-authentication-example.png">
+<meta property="og:image" content="http://zoub.in/engineering/digest-authentication-example.png">
+<meta property="og:image" content="http://zoub.in/engineering/basic-vs-digest.png">
+<meta property="og:updated_time" content="2016-01-30T10:24:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="http authentication">
+<meta name="twitter:description" content="《HTTP: The Definitive Guide》阅读笔记。
+
+Authentication means showing some proof of your identify.
+
+当用户访问某些隐私信息时，需要用户提供身份证明，通常就是填写用户名和密码。
+Basic Authentication
+
+用户请求/family/jeff.jpg
+服务器响应401，要求进行basic authen">
+    
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <!--STYLES END-->
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/engineering/ ">心止在焉</a>
+    </h1>
+    
+</header>
+            <nav id="sidebar" data-behavior="3">
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">Home</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">Categories</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">Tags</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">Archive</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="/engineering/#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">Search</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/#about"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+                    <span class="sidebar-button-desc">About</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            http authentication
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Sat Jan 30 2016 18:23:25 GMT+0800">
+	
+		    Jan 30, 2016
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <p>《<a href="http://www.staroceans.org/e-book/O&#39;Reilly%20-%20HTTP%20-%20The%20Definitive%20Guide.pdf" target="_blank" rel="external">HTTP: The Definitive Guide</a>》阅读笔记。</p>
+<blockquote>
+<p>Authentication means showing some proof of your identify.</p>
+</blockquote>
+<p>当用户访问某些隐私信息时，需要用户提供身份证明，通常就是填写用户名和密码。</p>
+<h2 id="Basic_Authentication">Basic Authentication</h2><p><img src="basic-authentication-example.png" alt="basic authentication"></p>
+<ul>
+<li>用户请求<code>/family/jeff.jpg</code></li>
+<li>服务器响应<code>401</code>，要求进行<code>basic authentication</code></li>
+<li>浏览器收到<code>401</code>响应，弹出对话框让用户输入用户名和密码。随后浏览器用冒号连接用户名和密码（<code>username:password</code>），用<a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="external">base-64</a>进行编码后添加<code>Authorization</code>头，再次请求<code>/family/jeff.jpg</code>。</li>
+<li>服务器解码后，验证通过，响应<code>200</code>。</li>
+</ul>
+<h3 id="安全隐患">安全隐患</h3><ul>
+<li>用户名和密码使用<a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="external">base-64</a>编码传输，一旦被获取后很容易就解码。</li>
+<li>即便使用了一种非常难以解码的算法进行编码，第三方拿到加密的东西后，还是可以用这个加密的东西去向服务器发请求，根本不需要解码。称之为<code>replay</code>攻击。</li>
+<li>即便是在不重要的场合下使用<a href="#basic-authentication">basic authentication</a>，第三方拿到用户名密码后，可以去其它场合尝试。很多人会在不同场合使用同样的用户名和密码组合。</li>
+<li>网络代理也可以只修改请求内容，而不修改请求头，从而完全改变请求行为。</li>
+<li>还可以伪装服务器，诱使用户输入用户名和密码。</li>
+</ul>
+<p><a href="#basic-authentication">basic authentication</a>需要结合SSL等技术一起使用以满足安全性的要求。</p>
+<h2 id="Digest_Authentication">Digest Authentication</h2><p><img src="digest-authentication-example.png" alt="digest authentication"></p>
+<ul>
+<li>用户请求受保护文档。</li>
+<li>服务器要求提供用户名和密码的某种加密形式（密码摘要，a digest form of password）</li>
+<li>用户提供用户名和密码摘要</li>
+<li>服务器存储了所有用户的密码摘要，直接对比两个摘要是否吻合。</li>
+</ul>
+<h3 id="digest">digest</h3><blockquote>
+<p>A digest is a “condensation of a body of information”.</p>
+</blockquote>
+<p>实际上就是一个单向映射，将无穷多可能的值映射到某个有限集合中。<br>譬如<a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>，将任意长度的字节映射成128位（的摘要）。</p>
+<p>这些映射最重要的特点是，如果不知道密码，需要花费很长的时间才能猜中对应的摘要；知道摘要，需要花费很长时间才能计算出密码。</p>
+<p><a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>的128位经常写成32个16进制的字符（每个代表4位）。也就是说，<a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>将任意长度的输入映射成32个字符。</p>
+<p>摘要本身还不能防止<code>replay</code>攻击，为此，服务器可以传给客户端一个<code>nonce</code>，客户端可以将其连接到密码摘要后面再发给服务器。<br>由于这个<code>nonce</code>可以变动频繁，或者是每次请求都不一样，即使拿到了这个“摘要:nonce”，也很快便会失效。</p>
+<p><a href="#digest-authentication">digest authentication</a>支持多种算法，RFC 2617中推荐<a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>和MD5-sess。默认是<a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>。</p>
+<p><strong>计算公式</strong><br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="constant">KD(H(A1)</span>, &lt;nonce&gt;<span class="symbol">:&lt;nc&gt;</span><span class="symbol">:&lt;cnonce&gt;</span><span class="symbol">:&lt;qop&gt;</span><span class="symbol">:H</span>(<span class="constant">A2)</span>)</span><br></pre></td></tr></table></figure></p>
+<p>实际中，前面的公式展开后为：<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="constant">MD5(MD5(A1)</span><span class="symbol">:&lt;nonce&gt;</span><span class="symbol">:&lt;nc&gt;</span><span class="symbol">:&lt;cnonce&gt;</span><span class="symbol">:&lt;qop&gt;</span><span class="symbol">:MD5</span>(<span class="constant">A2)</span>)</span><br></pre></td></tr></table></figure></p>
+<h4 id="H与KD">H与KD</h4><figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">H</span><span class="params">(d)</span></span> = <span class="function"><span class="title">MD5</span><span class="params">(d)</span></span></span><br><span class="line"><span class="function"><span class="title">KD</span><span class="params">(s, d)</span></span> = <span class="function"><span class="title">MD5</span><span class="params">(s:d)</span></span></span><br></pre></td></tr></table></figure>
+<h4 id="A1与A2">A1与A2</h4><p>请求信息被分为两部分：</p>
+<ul>
+<li><code>A1</code>代表秘密相关的部分</li>
+<li><code>A2</code>代表秘密不相关的部分</li>
+</ul>
+<p>RFC 2617定义了两种方式来计算<code>A1</code>。</p>
+<ul>
+<li><p><code>MD5</code>。每次请求都需要执行一次单向哈希函数。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="constant">A1 </span>= &lt;user&gt;<span class="symbol">:&lt;realm&gt;</span><span class="symbol">:&lt;password&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>MD5-sess</code>。哈希函数只在WWW-Authenticate握手时执行一次。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="constant">A1 </span>= <span class="constant">MD5(</span>&lt;user&gt;<span class="symbol">:&lt;realm&gt;</span><span class="symbol">:&lt;password&gt;</span>)<span class="symbol">:&lt;nonce&gt;</span><span class="symbol">:&lt;cnonce&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><code>A2</code>代表的是消息本身，如URL，请求方法（request method），消息实体（entity body）。<br>可用来防止消息被恶意篡改。</p>
+<p>RFC 2617也定义了两种计算<code>A2</code>的方式。</p>
+<ul>
+<li><p><code>qop=&quot;auth&quot;</code>。只包含URL和请求方法。</p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A2 = &lt;request-<span class="function"><span class="keyword">method</span>&gt;:</span>&lt;uri-directive-value&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>qop=&quot;auth-init&quot;</code>。添加了消息实体。</p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A2 = &lt;request-<span class="function"><span class="keyword">method</span>&gt;:</span>&lt;uri-directive-value&gt;:H(&lt;request-entity-body&gt;)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><code>qop</code>即<code>quality of protection</code>。</p>
+<h4 id="nonce">nonce</h4><p>RFC 2617推荐的生成方法：<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nonce = BASE64<span class="list">(<span class="keyword">time-stamp</span> H<span class="list">(<span class="keyword">time-stamp</span> <span class="string">":"</span> ETag <span class="string">":"</span> private-key)</span>)</span></span><br></pre></td></tr></table></figure></p>
+<p><code>time-stamp</code>为时间戳，或是其它不会重复的值。<br><code>ETag</code>即对应的请求头值，和请求实体绑定。<br><code>private-key</code>是只有服务器知道的秘密。</p>
+<p>服务器在收到客户端的<code>Authorization</code>请求头后，重新计算哈希部分（<code>H()</code>），<br>并检查其是否与<code>Authorization</code>头中的<code>nonce</code>值吻合。</p>
+<p>服务器在计算哈希进行对比验证时，需要上次的<code>time-stamp</code>，<br>可以对<code>Authorization</code>头中的<code>nonce</code>先进行<a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="external">base-64</a>解码，去掉后面32个字符得到。</p>
+<p><code>ETag</code>可从请求头中取得。<code>private-key</code>应该是不变的吧。</p>
+<h3 id="其它安全考虑">其它安全考虑</h3><h4 id="请求头篡改">请求头篡改</h4><p><a href="#digest-authentication">digest authentication</a>只对WWW-Authenticate和Authorization请求头进行了一定程度的防护，要想保证其它请求头不被篡改，需要对请求头进行端到端加密或数字签名。</p>
+<h4 id="Replay_Attacks">Replay Attacks</h4><p>blabla</p>
+<p>推荐做法是<code>nonce</code>值只对一次<code>transaction</code>有效，且设置<code>timeout</code>。</p>
+<h4 id="Dictionary_Attacks">Dictionary Attacks</h4><p>第三方可以长时间地监听<code>http transaction</code>，搜集<code>nonce/response</code>对，然后用密码推测程序去猜密码。<br>为了应对这种攻击，最好地策略是使用复杂密码，且定期换密码。</p>
+<h4 id="Hostile_Proxies_and_Man-in-the-Middle_Attacks">Hostile Proxies and Man-in-the-Middle Attacks</h4><p>很多请求都经过代理，代理便能进行监听，或者是将认证协议改成<a href="#basic-authentication">basic authentication</a>。</p>
+<p>这个问题除了使用SSL外，基本无解。</p>
+<h4 id="Chosen_Plaintext_Attacks">Chosen Plaintext Attacks</h4><p>客户端利用服务器提供的<code>nonce</code>来计算其<code>response</code>，<br>所以，代理或服务器便可能在<code>nonce</code>上做手脚来获得密码。</p>
+<p><strong>Precomputed dictionary attacks</strong></p>
+<p>结合了Dictionary Attacks的特点。<br>事先利用一些<code>nonce</code>和密码生成对应的<code>response</code>，<br>然后将这些<code>nonce</code>发给客户端，收到<code>response</code>后再去查，一旦匹配上便知道了密码。</p>
+<p><strong>Batched brute-force attacks</strong></p>
+<p>与前一种方式的不同之处在于，并不是从事先算好的<code>response</code>中去找匹配，<br>而是直接根据<code>response</code>去穷举。</p>
+<p>此种攻击容易破解，只需要开启<code>cnonce</code>。<br>这个值是由客户端计算出来的，根据它去计算<code>response</code>便基本防止了从<code>nonce</code>和<code>response</code>去猜密码的可能性。</p>
+<h4 id="Storing_Passwords">Storing Passwords</h4><p><a href="#digest-authentication">digest authentication</a>机制将用户的<code>response</code>与服务器存储的信息做对比，<br>这些信息（通常是用户名，<code>H(A1)</code>）一旦被暴露，从前面的公式可以看出，便可以不需要解出密码，而直接根据服务器的<code>nonce</code>去计算<code>response</code>，进行攻击。</p>
+<p>这种攻击基本上也是无解的，减轻的方法是：</p>
+<ul>
+<li>服务器将这些信息更妥善的保管</li>
+<li>尽量设置好<code>realm</code>，一旦被暴，影响也是局部的。</li>
+</ul>
+<h3 id="对比">对比</h3><p><img src="basic-vs-digest.png" alt="basic-vs-digest"></p>
+<ul>
+<li>不明文传输密码。</li>
+<li>防止<code>replay</code>攻击。</li>
+<li>防止恶意修改请求内容。</li>
+<li>及其它一些常见的攻击手段。</li>
+</ul>
+<h2 id="真正安全的可行方案">真正安全的可行方案</h2><p>真正安全地作法就是使用SSL。</p>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/engineering/tags/HTTP/">HTTP</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/11/18/prototype-in-js/" data-tooltip="JS中一些有关原型的问题">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Bin Zou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/11/18/prototype-in-js/" data-tooltip="JS中一些有关原型的问题">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/http-authentication/">
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        <div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <h4 id="about-card-name">Bin Zou</h4>
+        
+            <h5 id="about-card-bio"><p><img src="https://avatars1.githubusercontent.com/u/2097644?v=3&amp;s=100" alt="avatar"></p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Frontend Engineer</p>
+
+            </h5>
+        
+        
+    </div>
+</div>
+
+        <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<!--SCRIPTS END-->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'zoubin';
+        (function() {
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
+
+    <script type="text/javascript">
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+                (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+            e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','JrgMusyGYH38rsYxCTiq','2.0.0');
+    </script>
+
+
+</html>

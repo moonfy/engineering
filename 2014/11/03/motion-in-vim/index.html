@@ -1,0 +1,921 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="心止在焉">
+    <title>motion in vim - 心止在焉</title>
+    <meta name="author" content="Bin Zou">
+    
+    
+        <link rel="alternative" type="application/atom+xml" title="RSS" href="/engineering/atom.xml">
+    
+    <meta name="description" content="motion command cheat sheet单词级别的移动
+
+
+命令
+特点
+含义
+示例
+
+
+
+
+w
+exclusive
+移至右边第一个“单词首字母位置”
+Hello World! &amp;raquo;w &amp;raquo; Hello World!
+
+
+W
+exclusive
+移至右边第一个“非空白串首字母位置”
+(a, b) W (a, b)($par, $ext) dW ($ext)
+
+
+b
+e">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="motion in vim">
+<meta property="og:url" content="http://zoub.in/engineering/2014/11/03/motion-in-vim/index.html">
+<meta property="og:site_name" content="心止在焉">
+<meta property="og:description" content="motion command cheat sheet单词级别的移动
+
+
+命令
+特点
+含义
+示例
+
+
+
+
+w
+exclusive
+移至右边第一个“单词首字母位置”
+Hello World! &amp;raquo;w &amp;raquo; Hello World!
+
+
+W
+exclusive
+移至右边第一个“非空白串首字母位置”
+(a, b) W (a, b)($par, $ext) dW ($ext)
+
+
+b
+e">
+<meta property="og:updated_time" content="2016-01-30T09:50:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="motion in vim">
+<meta name="twitter:description" content="motion command cheat sheet单词级别的移动
+
+
+命令
+特点
+含义
+示例
+
+
+
+
+w
+exclusive
+移至右边第一个“单词首字母位置”
+Hello World! &amp;raquo;w &amp;raquo; Hello World!
+
+
+W
+exclusive
+移至右边第一个“非空白串首字母位置”
+(a, b) W (a, b)($par, $ext) dW ($ext)
+
+
+b
+e">
+    
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <!--STYLES END-->
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/engineering/ ">心止在焉</a>
+    </h1>
+    
+</header>
+            <nav id="sidebar" data-behavior="3">
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">Home</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">Categories</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">Tags</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">Archive</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="/engineering/#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">Search</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/#about"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+                    <span class="sidebar-button-desc">About</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            motion in vim
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Mon Nov 03 2014 18:11:45 GMT+0800">
+	
+		    Nov 03, 2014
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <h2 id="motion_command_cheat_sheet">motion command cheat sheet</h2><h3 id="单词级别的移动">单词级别的移动</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>特点</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>w</td>
+<td>exclusive</td>
+<td>移至右边第一个“单词首字母位置”</td>
+<td><mark>H</mark>ello World! &raquo;<code>w</code> &raquo; Hello <mark>W</mark>orld!</td>
+</tr>
+<tr>
+<td>W</td>
+<td>exclusive</td>
+<td>移至右边第一个“非空白串首字母位置”</td>
+<td><mark>(</mark>a, b) <code>W</code> (a, <mark>b</mark>)<br>(<mark>$</mark>par, $ext) <code>dW</code> (<mark>$</mark>ext)</td>
+</tr>
+<tr>
+<td>b</td>
+<td>exclusive</td>
+<td>w的反方向</td>
+<td>-</td>
+</tr>
+<tr>
+<td>B</td>
+<td>exclusive</td>
+<td>W的反方向</td>
+<td>-</td>
+</tr>
+<tr>
+<td>e</td>
+<td>inclusive</td>
+<td>移至右边第一个“单词末字母位置”</td>
+<td><mark>H</mark>ello World! &raquo;<code>e</code> &raquo; Hell<mark>o</mark> World!<br>Hell<mark>o</mark> World! &raquo;<code>e</code> &raquo; Hello Worl<mark>d</mark>!</td>
+</tr>
+<tr>
+<td>E</td>
+<td>inclusive</td>
+<td>移至右边第一个“非空白串末字母位置”</td>
+<td><mark>(</mark>$a, $b, $c) &raquo;<code>E</code> &raquo; ($a<mark>,</mark> $b, $c) &raquo;<code>E</code> &raquo; ($a, $b<mark>,</mark> $c) &raquo; ($a, $b, $c<mark>)</mark></td>
+</tr>
+<tr>
+<td>ge</td>
+<td>inclusive</td>
+<td>e的反方向</td>
+<td>往左+inclusive，T和F是往左+exclusive</td>
+</tr>
+<tr>
+<td>gE</td>
+<td>inclusive</td>
+<td>E的反方向</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="行内任意跨度">行内任意跨度</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>特点</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fx</td>
+<td>inclusive</td>
+<td>向右移至字符x的位置</td>
+<td>Hell<mark>o</mark> World! &raquo;<code>fo</code> &raquo; Hello W<mark>o</mark>rld!<br>Hell<mark>o</mark> World! &raquo;<code>dfo</code>&raquo; Hell<mark>r</mark>ld!</td>
+</tr>
+<tr>
+<td>Fx</td>
+<td>exclusive</td>
+<td>向左移至字符x的位置</td>
+<td>Hello W<mark>o</mark>rld! &raquo;<code>Fo</code> &raquo; Hell<mark>o</mark> World!<br>Hello W<mark>o</mark>rld! &raquo;<code>dFo</code>&raquo; Hell<mark>o</mark>rld!<br>注意对比exclusive与inclusive的效果</td>
+</tr>
+<tr>
+<td>tx</td>
+<td>inclusive</td>
+<td>向右移至字符x的左一个位置</td>
+<td>Hell<mark>o</mark> World! &raquo;<code>to</code> &raquo; Hello <mark>W</mark>orld!<br>Hell<mark>o</mark> World! &raquo;<code>dto</code>&raquo; Hell<mark>o</mark>rld!</td>
+</tr>
+<tr>
+<td>Tx</td>
+<td>exclusive</td>
+<td>向左移至字符x的右一个位置</td>
+<td>Hello W<mark>o</mark>rld! &raquo;<code>To</code> &raquo; Hello<mark> </mark>World!<br>Hello W<mark>o</mark>rld! &raquo;<code>dTo</code>&raquo; Hello<mark>o</mark>rld!<br>注意对比exclusive与inclusive的效果</td>
+</tr>
+<tr>
+<td>;</td>
+<td>与被重复的移动一样</td>
+<td>重复前一次的f, F, t, T</td>
+<td><mark>H</mark>ello World! &raquo;<code>fo</code> &raquo; Hell<mark>o</mark> World! &raquo; <code>;</code> &raquo; Hello W<mark>o</mark>rld!</td>
+</tr>
+<tr>
+<td>,</td>
+<td>与被重复的移动一样</td>
+<td>反方向重复前一次的f, F, t, T</td>
+<td>Hell<mark>o</mark> World! &raquo;<code>fo</code> &raquo; Hello W<mark>o</mark>rld! &raquo; <code>,</code> &raquo; Hell<mark>o</mark> World!</td>
+</tr>
+</tbody>
+</table>
+<h3 id="行间">行间</h3><p>跨行的默认都是inclusive，但可以加v来修改。</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-</td>
+<td>移至上一行首个非空字符位置</td>
+</tr>
+<tr>
+<td>+</td>
+<td>移至下一行首个非空字符位置</td>
+</tr>
+<tr>
+<td>2g_</td>
+<td>移至下一行最后一个非空字符位置</td>
+</tr>
+<tr>
+<td>gg</td>
+<td>移至第一行</td>
+</tr>
+<tr>
+<td>G</td>
+<td>移至最后一行</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Mark">Mark</h3><p>可在任意光标处打标记，并进行命名，再通过命令直接移至该位置。时间顺序上，这些标记形成</p>
+<p>设置标记的命令：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>m{a-zA-Z}</td>
+<td>命名为指定字母</td>
+</tr>
+<tr>
+<td>m’<br>m`</td>
+<td>这两个标记表示mark list中的前一个位置</td>
+</tr>
+</tbody>
+</table>
+<p>移动至标记的命令：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>特点</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>`</td>
+<td>exclusive</td>
+<td>移至指定标记对应的光标位置</td>
+</tr>
+<tr>
+<td>‘</td>
+<td>inclusive<br>linewise</td>
+<td>移至指定标记对应的光标位置所在行的行首（第一个非空字符）</td>
+</tr>
+</tbody>
+</table>
+<p>除字母和数字外，下面还有几组实用的标记：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[</td>
+<td>前一次修改或复制文本首字符位置</td>
+<td>]</td>
+<td>前一次修改或复制文本末字符位置</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>前一次选择的visual块文本首字符位置</td>
+<td>&gt;</td>
+<td>前一次选择的visual块文本末字符位置</td>
+</tr>
+<tr>
+<td>‘, `</td>
+<td>前一次jump位置或m’m`设置的位置</td>
+<td>“</td>
+<td>前一次离开buffer的位置</td>
+</tr>
+<tr>
+<td>^</td>
+<td>前一次insert的位置</td>
+<td>.</td>
+<td>前一次修改的位置</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Jump">Jump</h3><p>当使用以下命令时，执行前光标所在位置会被记录：</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">', `, <span class="keyword">G</span>, /, ?, <span class="keyword">n</span>, <span class="keyword">N</span>, %, (, ), [[, ]], &#123;, &#125;, :s, :tag, <span class="keyword">L</span>, <span class="keyword">M</span>, <span class="literal">H</span></span><br></pre></td></tr></table></figure>
+<p>这些被记录的位置（jump list）可以通过以下这组命令快速移动：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CTRL-o</td>
+<td>移至更旧的记录位置</td>
+</tr>
+<tr>
+<td>CTRL-I<br>Tab</td>
+<td>移至更新的记录位置</td>
+</tr>
+</tbody>
+</table>
+<p>可以通过:ju[mps]来查看当前窗口的jump list。</p>
+<p>类似jump list，当修改文本时，光标位置也会被记录，形成一个change list。通过以下这组命令移动：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>g;</td>
+<td>移至更旧的修改位置</td>
+</tr>
+<tr>
+<td>g,</td>
+<td>移至更新的修改位置</td>
+</tr>
+</tbody>
+</table>
+<p>:changes可查看当前文件的所有修改位置</p>
+<h3 id="Various">Various</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>%</td>
+<td>在括号（或其它，见后面）的匹配位置间跳转</td>
+</tr>
+<tr>
+<td>[{</td>
+<td>移至前面（可不在同一行）第一个未被匹配的{</td>
+</tr>
+<tr>
+<td>[(</td>
+<td>移至前面（可不在同一行）第一个未被匹配的(</td>
+</tr>
+<tr>
+<td>])</td>
+<td>移至后面（可不在同一行）第一个未被匹配的)</td>
+</tr>
+<tr>
+<td>]}</td>
+<td>移至后面（可不在同一行）第一个未被匹配的}</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>关于%，可匹配的除了([{}])外，还有/<em> </em>/，以及#if, #ifdef, #else, #elif, #endif。如果装上matchit，可以在html开始结束标签间跳转</li>
+<li>关于有转义或是括号出现在字符串中的情况，可在:h %中找到更多信息</li>
+</ul>
+<p>以下这组命令适合较大范围的移动</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H</td>
+<td>窗口顶部</td>
+</tr>
+<tr>
+<td>M</td>
+<td>窗口中间</td>
+</tr>
+<tr>
+<td>L</td>
+<td>窗口底部</td>
+</tr>
+</tbody>
+</table>
+<p>注意：效果受scrolloff选项的影响。</p>
+<p>下面这组命令适合于在类似Java或PHP等中class定义文件中移动：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>]m</td>
+<td>下一个方法的开始位置{</td>
+<td>]M</td>
+<td>下一个方法的结束位置}</td>
+</tr>
+<tr>
+<td>[m</td>
+<td>上一个方法的开始位置{</td>
+<td>[M</td>
+<td>上一个方法的结束位置}</td>
+</tr>
+</tbody>
+</table>
+<h4 id="%示例">%示例</h4><p><code>%</code>之前：</p>
+<pre>
+<mark>Y</mark>.mix(Y_Node.prototype, {
+    purge: function (recurse, type) {
+        Y.Event.purgeElement(this._node, recurse, type);
+        return this;
+    }
+});
+</pre>
+
+<p><code>%</code>之后：</p>
+<pre>
+Y.mix(Y_Node.prototype, {
+    purge: function (recurse, type) {
+        Y.Event.purgeElement(this._node, recurse, type);
+        return this;
+    }
+}<mark>)</mark>;
+</pre>
+
+<h4 id="[{示例">[{示例</h4><p><code>[{</code>之前：</p>
+<pre>
+Y.mix(Y_Node.prototype, {
+    purge: function (<mark>r</mark>ecurse, type) {
+        Y.Event.purgeElement(this._node, recurse, type);
+        return this;
+    }
+});
+</pre>
+
+<p><code>[{</code>之后：</p>
+<pre>
+Y.mix(Y_Node.prototype, <mark>{</mark>
+    purge: function (recurse, type) {
+        Y.Event.purgeElement(this._node, recurse, type);
+        return this;
+    }
+});
+</pre>
+
+<h2 id="浏览">浏览</h2><p>以下几组命令适合于浏览文件，不一定会移动光标：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>zt</td>
+<td>当前行置于窗口顶部</td>
+</tr>
+<tr>
+<td>zb</td>
+<td>当前行置于窗口底部</td>
+</tr>
+<tr>
+<td>zz</td>
+<td>当前行置于窗口中间</td>
+</tr>
+<tr>
+<td>CTRL-F</td>
+<td>往下一屏</td>
+</tr>
+<tr>
+<td>CTRL-B</td>
+<td>往上一屏</td>
+</tr>
+<tr>
+<td>CTRL-D</td>
+<td>往下半屏</td>
+</tr>
+<tr>
+<td>CTRL-U</td>
+<td>往上半屏</td>
+</tr>
+</tbody>
+</table>
+<p>注意：效果受scrolloff选项的影响。</p>
+<h2 id="移动命令的两组特性">移动命令的两组特性</h2><h3 id="linewise_and_characterwise">linewise and characterwise</h3><p>移动命令可能影响整行，或是起始与结束位置间的文本。</p>
+<p>如果移动是跨行的（如k,j），则影响整行（或linewise）。这样操作的便是整行，所以dj删除的是两行。</p>
+<p>如果移动是行内的（如h,l），则影响起始与结束间的文本（characterwise）。这样操作的是一段文本（可能跨行），所以dl删除的是当前光标下的字符。</p>
+<h3 id="exclusive_and_inclusive">exclusive and inclusive</h3><p>对于跨行移动，起始与结束位置所在行总是受影响的。但对于行内移动而言，其起始与结束处的位置是否受影响，取决于该移动命令是exclusive还是inclusive。</p>
+<p>每个移动命令，都会指明其影响是exclusive还是inclusive。<br>对于inclusive命令而言，影响起始与结束位置的字符。对于exclusive命令而言，文本范围中的最后一个字符将被排除在外。  </p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">" 假设光标停留在"</span>abcdef<span class="string">"中的c字符上</span></span><br><span class="line">yfe <span class="string">" 复制cde，因为f是inclusive命令</span></span><br><span class="line">yFa <span class="string">" 复制ab，因为F是exclusive命令，所以文本范围中的最后一个字符c被排除在外</span></span><br></pre></td></tr></table></figure>
+<p>跨行移动，总是inclusive的。</p>
+<h3 id="转换的情况">转换的情况</h3><p>linewise和characterwise的操作是可以强制转换的。方法便是在operator后面加v, V或CTRL-V。  </p>
+<ul>
+<li>v置于operator和motion之间，则操作将成为characterwise。<ul>
+<li>如果移动命令是linewise，则转换后操作是exclusive的。譬如dj本来删除的是两行，而dvj则删除的是当前光标到下行同样位置间的字符，不包括最后一个字符。</li>
+<li>如果移动命令是characterwise，则会切换其exclusive/inclusive特性。譬如dl本来删除的是当前光标下的字符，但dvl则删除的是当前光标和下一个位置的两个字符，因为l本是characterwise且exclusive，加上v后便成了inclusive了。</li>
+</ul>
+</li>
+<li>V置于operator和motion之间，则操作将成为linewise。</li>
+<li>CTRL-V可实现块操作</li>
+</ul>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/engineering/tags/vim/">vim</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/05/command-mode-in-vim/"  data-tooltip="command mode in vim">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/03/cheat-sheet-vim/" data-tooltip="cheat sheet - vim">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Bin Zou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/05/command-mode-in-vim/"  data-tooltip="command mode in vim">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/03/cheat-sheet-vim/" data-tooltip="cheat sheet - vim">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/03/motion-in-vim/">
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        <div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <h4 id="about-card-name">Bin Zou</h4>
+        
+            <h5 id="about-card-bio"><p><img src="https://avatars1.githubusercontent.com/u/2097644?v=3&amp;s=100" alt="avatar"></p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Frontend Engineer</p>
+
+            </h5>
+        
+        
+    </div>
+</div>
+
+        <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<!--SCRIPTS END-->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'zoubin';
+        (function() {
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
+
+    <script type="text/javascript">
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+                (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+            e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','JrgMusyGYH38rsYxCTiq','2.0.0');
+    </script>
+
+
+</html>

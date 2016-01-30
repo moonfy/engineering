@@ -1,0 +1,430 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="心止在焉">
+    <title>一个随机数生成问题 - 心止在焉</title>
+    <meta name="author" content="Bin Zou">
+    
+    
+        <link rel="alternative" type="application/atom+xml" title="RSS" href="/engineering/atom.xml">
+    
+    <meta name="description" content="问题描述假定有函数random()可得到0或1，其概率相同，均为1/2。如何得到一个可得到1..n整数的等概率随机数生产函数randomN？
+思路通过某种方式可得到一个数集，且其中每个数的出现概率是可计算的，这样，只需要确定这个方式，然后从数集中选择那些出现概率等于期望得到的数值即可。
+现在可直接产生一个0或1，其概率是相同的，那么可以产生n次，一共有2^n种结果，而其中有n种结果的出现概率是相同">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="一个随机数生成问题">
+<meta property="og:url" content="http://zoub.in/engineering/2015/04/10/random-numbers/index.html">
+<meta property="og:site_name" content="心止在焉">
+<meta property="og:description" content="问题描述假定有函数random()可得到0或1，其概率相同，均为1/2。如何得到一个可得到1..n整数的等概率随机数生产函数randomN？
+思路通过某种方式可得到一个数集，且其中每个数的出现概率是可计算的，这样，只需要确定这个方式，然后从数集中选择那些出现概率等于期望得到的数值即可。
+现在可直接产生一个0或1，其概率是相同的，那么可以产生n次，一共有2^n种结果，而其中有n种结果的出现概率是相同">
+<meta property="og:updated_time" content="2016-01-30T09:50:11.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一个随机数生成问题">
+<meta name="twitter:description" content="问题描述假定有函数random()可得到0或1，其概率相同，均为1/2。如何得到一个可得到1..n整数的等概率随机数生产函数randomN？
+思路通过某种方式可得到一个数集，且其中每个数的出现概率是可计算的，这样，只需要确定这个方式，然后从数集中选择那些出现概率等于期望得到的数值即可。
+现在可直接产生一个0或1，其概率是相同的，那么可以产生n次，一共有2^n种结果，而其中有n种结果的出现概率是相同">
+    
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <!--STYLES END-->
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/engineering/ ">心止在焉</a>
+    </h1>
+    
+</header>
+            <nav id="sidebar" data-behavior="3">
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">Home</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">Categories</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">Tags</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">Archive</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="/engineering/#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">Search</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/#about"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+                    <span class="sidebar-button-desc">About</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            一个随机数生成问题
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Fri Apr 10 2015 09:55:54 GMT+0800">
+	
+		    Apr 10, 2015
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <h2 id="问题描述">问题描述</h2><p>假定有函数<code>random()</code>可得到0或1，其概率相同，均为1/2。如何得到一个可得到1..n整数的等概率随机数生产函数<code>randomN</code>？</p>
+<h3 id="思路">思路</h3><p>通过某种方式可得到一个数集，且其中每个数的出现概率是可计算的，这样，只需要确定这个方式，然后从数集中选择那些出现概率等于期望得到的数值即可。</p>
+<p>现在可直接产生一个0或1，其概率是相同的，那么可以产生n次，一共有2^n种结果，而其中有n种结果的出现概率是相同的，即n次中恰好有一次产生1而其它n-1次均产生0.</p>
+<h3 id="实现">实现</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 给定等概率生产0, 1的函数</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">random</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> +(<span class="built_in">Math</span>.random() &lt; <span class="number">0.5</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">function randomN(<span class="keyword">n</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> <span class="keyword">m</span> = 0; <span class="comment">// n次结果中1的个数</span></span><br><span class="line">  <span class="keyword">var</span> k = 0; <span class="comment">// n次结果中为1的最大序号</span></span><br><span class="line">  <span class="keyword">var</span> t;</span><br><span class="line">  <span class="keyword">var</span> i;</span><br><span class="line">  <span class="keyword">while</span> (<span class="keyword">m</span> != 1) &#123;</span><br><span class="line">    <span class="keyword">m</span> = 0;</span><br><span class="line">    k = 0;</span><br><span class="line">    <span class="keyword">for</span> (i = 1; i &lt;= <span class="keyword">n</span>; i++) &#123;</span><br><span class="line">      t = random();</span><br><span class="line">      k = t == 1 ? i : k;</span><br><span class="line">      <span class="keyword">m</span> += t;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> k;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="复杂度分析">复杂度分析</h3><p>一共有<code>2^n</code>种可能结果，其中有<code>n</code>种结果是我们所需要的，故外层循环终止的概率是<code>n/2^n</code>，期望循环次数为<code>2^n/n</code>，里面的操作次数为<code>n</code>，故一共需要执行<code>2^n</code>次<code>random</code>调用。</p>
+<h3 id="改进">改进</h3><p>前面的可能结果太多，复杂度为<code>O(2^n)</code>。可以想办法缩减可能结果。</p>
+<p>当然，最少也得有<code>n</code>种可能。如何产生<code>n</code>各可能呢？</p>
+<p>考虑用二进制来表示整数。对于一个恰好有<code>m</code>位的数而言，只需要确定每一位是为1还是0即可确定该数。其可能结果集为<code>0..2^m-1</code>，其中任何一个数出现的概率均为<code>1/2^m</code>，这样，从中选取<code>n</code>个数即可满足需求。</p>
+<p>选取方式可作一个简单的映射，即<code>0..n-1</code>对应<code>1..n</code>。当随机<code>m</code>次得到整数<code>k</code>时，就选取<code>k+1</code>为最终的随机数。如果<code>k+1&gt;n</code>，可直接丢弃，重新生产。</p>
+<p>为使复杂度最少，可求得满足条件的最小<code>m</code>。</p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// min&#123;m | 2^m &gt;= n&#125;</span></span><br><span class="line">function maxNumOfBits(<span class="keyword">n</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> <span class="keyword">m</span> = 0;</span><br><span class="line">  <span class="keyword">while</span> (<span class="keyword">m</span>++, (<span class="keyword">n</span> &gt;&gt;= 1));</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">m</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1..n</span></span><br><span class="line">function randomN(<span class="keyword">n</span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> <span class="keyword">m</span> = maxNumOfBits(<span class="keyword">n</span>);</span><br><span class="line">  <span class="keyword">var</span> <span class="keyword">ret</span> = <span class="keyword">n</span>;</span><br><span class="line">  <span class="keyword">while</span> (<span class="keyword">ret</span> &gt;= <span class="keyword">n</span>) &#123;</span><br><span class="line">    <span class="keyword">ret</span> = 0;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = 0, t = 1; i &lt; <span class="keyword">m</span>; i++, t &lt;&lt;= 1) &#123;</span><br><span class="line">      <span class="keyword">if</span> (random()) &#123;</span><br><span class="line">        <span class="keyword">ret</span> |= t;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">ret</span> + 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述算法中<code>m=ceiling(lgn)</code>。每次产生出满足条件(<code>ret &lt; n</code>)的随机数的概率是<code>n/2^m</code>，故<code>while</code>循环的期望执行次数为<code>2^m/n</code>，且<code>1 &lt;= 2^m/n &lt; 2</code>，故算法的平均复杂度为<code>O(lgn)</code>。</p>
+<h2 id="测试">测试</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// TEST</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params">r, n, index</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> ret = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> expectedIndex = index || <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 实验次数</span></span><br><span class="line">  <span class="keyword">var</span> totalTimes = +(n + <span class="string">'e'</span> + expectedIndex);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Generate random numbers '</span> + totalTimes + <span class="string">' times in total'</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 期望每个数出现的次数</span></span><br><span class="line">  <span class="keyword">var</span> expectedAppearances = +(<span class="string">'1e'</span> + expectedIndex);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Expect each number to appear '</span> + expectedAppearances + <span class="string">' times'</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> confidence_90_low = +(<span class="string">'0.9e'</span> + expectedIndex);</span><br><span class="line">  <span class="keyword">var</span> confidence_90_high = +(<span class="string">'1.1e'</span> + expectedIndex);</span><br><span class="line">  <span class="keyword">var</span> confidence_95_low = +(<span class="string">'0.95e'</span> + expectedIndex);</span><br><span class="line">  <span class="keyword">var</span> confidence_95_high = +(<span class="string">'1.05e'</span> + expectedIndex);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> m;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; totalTimes; i++) &#123;</span><br><span class="line">    m = r(n);</span><br><span class="line">    ret[m] = (ret[m] || <span class="number">0</span>) + <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'All results:'</span>, ret);</span><br><span class="line">  <span class="keyword">var</span> numbers = <span class="built_in">Object</span>.keys(ret);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Number of numbers:'</span>, numbers.length);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Maximum:'</span>, <span class="built_in">Math</span>.max.apply(<span class="built_in">Math</span>, numbers));</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Minimum:'</span>, <span class="built_in">Math</span>.min.apply(<span class="built_in">Math</span>, numbers));</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> casesAbove95 = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">var</span> casesAbove90 = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>, len = numbers.length; i &lt; len; i++) &#123;</span><br><span class="line">    <span class="keyword">var</span> rn = ret[numbers[i]];</span><br><span class="line">    <span class="keyword">if</span> (rn &gt;= confidence_90_low &amp;&amp; rn &lt;= confidence_90_high)</span><br><span class="line">      casesAbove90++;</span><br><span class="line">    <span class="keyword">if</span> (rn &gt;= confidence_95_low &amp;&amp; rn &lt;= confidence_95_high)</span><br><span class="line">      casesAbove95++;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'About '</span> + +(casesAbove90 / n + (<span class="string">'e2'</span>)) + <span class="string">' percent of numbers have 90 percent confidence:'</span>, confidence_90_low, confidence_90_high);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'About '</span> + +(casesAbove95 / n + (<span class="string">'e2'</span>)) + <span class="string">' percent of numbers have 95 percent confidence:'</span>, confidence_95_low, confidence_95_high);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="另一个问题">另一个问题</h2><p>如果<code>random()</code>产生0或1的概率不等，且未知，如何获得一个产生等概率0或1的<code>random()</code>？</p>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/engineering/tags/algorithm/">algorithm</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/09/02/css-layout/"  data-tooltip="css layout">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/05/command-mode-in-vim/" data-tooltip="command mode in vim">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Bin Zou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2015/09/02/css-layout/"  data-tooltip="css layout">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2014/11/05/command-mode-in-vim/" data-tooltip="command mode in vim">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/04/10/random-numbers/">
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        <div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <h4 id="about-card-name">Bin Zou</h4>
+        
+            <h5 id="about-card-bio"><p><img src="https://avatars1.githubusercontent.com/u/2097644?v=3&amp;s=100" alt="avatar"></p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Frontend Engineer</p>
+
+            </h5>
+        
+        
+    </div>
+</div>
+
+        <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<!--SCRIPTS END-->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'zoubin';
+        (function() {
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
+
+    <script type="text/javascript">
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+                (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+            e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','JrgMusyGYH38rsYxCTiq','2.0.0');
+    </script>
+
+
+</html>
