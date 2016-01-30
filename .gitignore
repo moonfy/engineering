@@ -2,8 +2,8 @@
 Thumbs.db
 db.json
 *.log
-node_modules/
-public/
-themes/
-.deploy*/
+node_modules
+public
+themes
+.deploy*
 npm-debug.log
