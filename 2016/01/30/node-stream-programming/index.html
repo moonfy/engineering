@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="generator" content="心止在焉">
-    <title>Node.js Stream - 原理 - 心止在焉</title>
+    <title>Node.js Stream - 程序设计 - 心止在焉</title>
     <meta name="author" content="Bin Zou">
     
     
@@ -18,17 +18,17 @@
 
 第一部分">
 <meta property="og:type" content="blog">
-<meta property="og:title" content="Node.js Stream - 原理">
-<meta property="og:url" content="http://zoub.in/engineering/2016/01/30/node-stream-principles/index.html">
+<meta property="og:title" content="Node.js Stream - 程序设计">
+<meta property="og:url" content="http://zoub.in/engineering/2016/01/30/node-stream-programming/index.html">
 <meta property="og:site_name" content="心止在焉">
 <meta property="og:description" content="前言在构建大型系统时，通常将其拆解为功能独立的若干部分，这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。
 在unix中，shell通过管道|连接各部分，其输入输出的规范是文本流。在Node.js中，内置的stream模块也实现了类似功能，组件间通过.pipe()连接。
 本系列试着从三个方面介绍stream相关的内容，这三部分各自独立，无须从头至尾全部读完。
 
 第一部分">
-<meta property="og:updated_time" content="2016-01-30T11:06:07.000Z">
+<meta property="og:updated_time" content="2016-01-30T11:07:07.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Node.js Stream - 原理">
+<meta name="twitter:title" content="Node.js Stream - 程序设计">
 <meta name="twitter:description" content="前言在构建大型系统时，通常将其拆解为功能独立的若干部分，这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。
 在unix中，shell通过管道|连接各部分，其输入输出的规范是文本流。在Node.js中，内置的stream模块也实现了类似功能，组件间通过.pipe()连接。
 本系列试着从三个方面介绍stream相关的内容，这三部分各自独立，无须从头至尾全部读完。
@@ -171,11 +171,11 @@
         <div class="post-header main-content-wrap text-left">
     
         <h1 class="post-title" itemprop="headline">
-            Node.js Stream - 原理
+            Node.js Stream - 程序设计
         </h1>
     
     <div class="post-meta">
-    <time itemprop="datePublished" content="Sat Jan 30 2016 19:03:21 GMT+0800">
+    <time itemprop="datePublished" content="Sat Jan 30 2016 19:06:32 GMT+0800">
 	
 		    Jan 30, 2016
     	
@@ -194,7 +194,7 @@
 <li>第二部分：<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层实现管窥。重点剖析<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层是如何支持流式数据处理的，以及<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>提供的<code>backpressure mechanism</code>是如何实现的。</li>
 <li>第三部分：介绍如何使用<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>进行程序设计。这部分会着重解析<a href="https://github.com/substack/node-browserify" target="_blank" rel="external">Browserify</a>和<a href="https://github.com/gulpjs/gulp" target="_blank" rel="external">Gulp</a>的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>设计模式，并基于<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>构建一个为<a href="https://git-scm.com/" target="_blank" rel="external">Git</a>仓库自动生成changelog的应用。</li>
 </ul>
-<h2 id="Stream原理">Stream原理</h2><p>TBD</p>
+<h2 id="Stream程序设计">Stream程序设计</h2><p>TBD</p>
 <h2 id="参考文献">参考文献</h2><ul>
 <li><a href="https://github.com/substack/browserify-handbook" target="_blank" rel="external">substack#browserify-handbook</a></li>
 <li><a href="https://github.com/zoubin/streamify-your-node-program" target="_blank" rel="external">zoubin#streamify-your-node-program</a></li>
@@ -220,7 +220,7 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2016/01/30/node-stream-programming/"  data-tooltip="Node.js Stream - 程序设计">
+                    <a class="post-action-btn btn btn--disabled">
                 
                     <i class="fa fa-angle-left"></i>
                     <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
@@ -228,7 +228,7 @@
             </li>
             <li class="post-action">
                 
-                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2016/01/30/node-stream-basics/" data-tooltip="Node.js Stream - 入门">
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2016/01/30/node-stream-principles/" data-tooltip="Node.js Stream - 原理">
                 
                     <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
                     <i class="fa fa-angle-right"></i>
@@ -243,17 +243,17 @@
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -299,7 +299,7 @@
         <ul class="post-actions post-action-nav">
             <li class="post-action">
                 
-                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2016/01/30/node-stream-programming/"  data-tooltip="Node.js Stream - 程序设计">
+                    <a class="post-action-btn btn btn--disabled">
                 
                     <i class="fa fa-angle-left"></i>
                     <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
@@ -307,7 +307,7 @@
             </li>
             <li class="post-action">
                 
-                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2016/01/30/node-stream-basics/" data-tooltip="Node.js Stream - 入门">
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2016/01/30/node-stream-principles/" data-tooltip="Node.js Stream - 原理">
                 
                     <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
                     <i class="fa fa-angle-right"></i>
@@ -322,17 +322,17 @@
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -358,17 +358,17 @@
                 <div id="share-options-bar" class="share-options-bar" data-behavior="3">
     <ul class="share-options">
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-programming/">
                 <i class="fa fa-twitter"></i><span>Share on Twitter</span>
             </a>
         </li>
