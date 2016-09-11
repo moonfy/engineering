@@ -1,0 +1,2361 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>心止在焉</title>
+  <subtitle>未有圣人而不豪杰者也</subtitle>
+  <link href="/engineering/atom.xml" rel="self"/>
+  
+  <link href="http://zoub.in/engineering/"/>
+  <updated>2016-09-11T14:54:23.000Z</updated>
+  <id>http://zoub.in/engineering/</id>
+  
+  <author>
+    <name>Bin Zou</name>
+    <email>zoubin04@gmail.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>JS中使用大数的问题</title>
+    <link href="http://zoub.in/engineering/2016/09/10/js-floating-point/"/>
+    <id>http://zoub.in/engineering/2016/09/10/js-floating-point/</id>
+    <published>2016-09-10T15:00:00.000Z</published>
+    <updated>2016-09-11T14:54:23.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="前后端大数精度不一致可能引起问题"><a href="#前后端大数精度不一致可能引起问题" class="headerlink" title="前后端大数精度不一致可能引起问题"></a>前后端大数精度不一致可能引起问题</h2><p>JS中Number类型以64位的双精度浮点型表示，其能表示的整数范围有限，且大于一定值时可表达的整数值不再连续。<br>因此，如果后端传给前端一个JS中无法表达的整数值（譬如64位的大整数），则JS在存储时将寻找一个近似值代替，导致前后端保存的是不一样的值，从而在某些使用场景中出现问题，譬如作为对象的key。</p>
+<p>所以，后端要尽量避免传给前端大整数值，因为这个整数值前端根本用不了，一使用就可能出错。</p>
+<p>本文将介绍Number类型可表达的值范围，并总结一些因为该范围限制而可能出现的问题。</p>
+<h2 id="浮点数形式"><a href="#浮点数形式" class="headerlink" title="浮点数形式"></a>浮点数形式</h2><p><a href="https://en.wikipedia.org/wiki/IEEE_floating_point" target="_blank" rel="external">IEEE 754-2008</a>这个规范定义了一种浮点数的形式，以及近似规则。其浮点数有以下形式：</p>
+<p>V = (-1)^s * M * 2^E</p>
+<p>可以看出，这种形式的浮点数，其值由三个因素决定：</p>
+<ul>
+<li>符号位 s。有两种可能值，1 表示负数，0 表示正数。需要占用 1 位。</li>
+<li>尾数 M。有效数字。</li>
+<li>指数 E。控制小数点位置。</li>
+</ul>
+<p>假设用 m 位二进制表示浮点数 V，则将其分为三部分（从最高位到最低位）：符号位（1位）、指数（k位）、尾数（n位）。</p>
+<p>例如，</p>
+<table>
+<thead>
+<tr>
+<th>&nbsp;</th>
+<th>m</th>
+<th>s</th>
+<th>k</th>
+<th>n</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单精度</td>
+<td>32</td>
+<td>1</td>
+<td>8</td>
+<td>23</td>
+</tr>
+<tr>
+<td>双精度</td>
+<td>64</td>
+<td>1</td>
+<td>11</td>
+<td>52</td>
+</tr>
+</tbody>
+</table>
+<h2 id="可表示的浮点数值"><a href="#可表示的浮点数值" class="headerlink" title="可表示的浮点数值"></a>可表示的浮点数值</h2><p>假设决定尾数的 n 位二进制为 f，决定指数的 k 位二进制为 e。<br>根据 e 的模式，这种形式可表示的浮点数可分为三类：</p>
+<table>
+<thead>
+<tr>
+<th>&nbsp;</th>
+<th>e</th>
+<th>E</th>
+<th>M</th>
+<th>V</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非规范值</td>
+<td>全 0</td>
+<td>1 - Bias</td>
+<td>0.f</td>
+<td>(-1)^s * 0.f * 2^(1 - Bias)</td>
+</tr>
+<tr>
+<td>特殊值</td>
+<td>全 1</td>
+<td>e</td>
+<td>任意</td>
+<td>Infinity, -Infinity 或 NaN</td>
+</tr>
+<tr>
+<td>规范值</td>
+<td>其它</td>
+<td>e - Bias</td>
+<td>1.f</td>
+<td>(-1)^s * 1.f * 2^(e - Bias)</td>
+</tr>
+</tbody>
+</table>
+<p>上面的表格中 Bias = 2^(k - 1) - 1。对于双精度而言，Bias = 1023。</p>
+<p>对于特殊值，f 为全 0 时，表示 Infinity 或 -Infinity，符号取决于符号位 s；f 为其它值时，表示 NaN。<br>可见，特殊值一共有 2^(n + 1) 种，其中包括 Infinity、-Infinity 和 2^(n + 1) - 2 个视作 NaN 的数。</p>
+<p>非规范值（不包含0）的绝对值最小值为 2^(-n) * 2^(1 - Bias)，最大值为 (1 - 2^(-n)) * 2^(1 - Bias)。<br>f 为 0 时 V = 0，随 s 的不同有正负 0 两个。</p>
+<p>规范值的绝对值最小值为 2^(1- Bias)，最大值为 (2 - 2^(-n)) * 2^( 2^(k - 1) - 1 )。</p>
+<p>设 epsilon = 2^(-n)，对于双精度而言，epsilon = 2^(-52)，规范值与非规范值（不包含0）的绝对值范围为：</p>
+<table>
+<thead>
+<tr>
+<th>&nbsp;</th>
+<th>MIN</th>
+<th>MAX</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非规范值</td>
+<td>epsilon * 2^(-1022)</td>
+<td>(1 - epsilon) * 2^(-1022)</td>
+</tr>
+<tr>
+<td>规范值</td>
+<td>2^(-1022)</td>
+<td>(2 - epsilon) * 2^1023</td>
+</tr>
+</tbody>
+</table>
+<p>可表示的浮点数一定在上面的范围中，但在范围内的浮点数不一定能被表示，则会根据规则做一定近似。</p>
+<h2 id="可表示的整数值"><a href="#可表示的整数值" class="headerlink" title="可表示的整数值"></a>可表示的整数值</h2><p>从前面的浮点数值范围可以知道，可表示的整数都是规范值。</p>
+<p>尾数（1.f）一共有 (n + 1) 位，通过指数移动小数点可使 V 为整数，其值范围为 [1, 2^(n+1) - 1]，这个区间内的任意整数都是可以表示的，这是一个连续的整数区间。<br>从表示形式可以看出，任何 2^x 的整数都是可表示的，所以，也可以说[1, 2^(n+1)]区间是一个连续的整数区间。但是大于2^(n+1)的整数，则不一定能被表示。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>)</div><div class="line"><span class="comment">// 9007199254740992</span></div><div class="line"><span class="comment">// 可表示</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">1</span></div><div class="line"><span class="comment">// 9007199254740992</span></div><div class="line"><span class="comment">// 不可表示，用 9007199254740992 近似</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">2</span></div><div class="line"><span class="comment">// 9007199254740994</span></div><div class="line"><span class="comment">// 可表示</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">3</span></div><div class="line"><span class="comment">// 9007199254740996</span></div><div class="line"><span class="comment">// 不可表示，用 9007199254740996 近似</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">4</span></div><div class="line"><span class="comment">// 9007199254740996</span></div><div class="line"><span class="comment">// 可表示</span></div></pre></td></tr></table></figure>
+<p><strong>Number可安全表示的正整数范围</strong> ：[1, 2^53]。超过2^53，便开始出现不可表示的情况。</p>
+<p>近似的规则：</p>
+<ul>
+<li>寻找最近的可表示数</li>
+<li>如果有两个最近的可表示数，则取最小有效位为偶数的</li>
+</ul>
+<p>这种近似并非四舍五入，且值越大的区间，可表示的数就越稀疏（绝对误差越大）。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">(<span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">3</span>) * <span class="number">4</span></div><div class="line"><span class="comment">// 36028797018963980</span></div><div class="line"></div><div class="line"><span class="number">36028797018963988</span></div><div class="line"><span class="comment">// 36028797018963980</span></div><div class="line"></div><div class="line"><span class="number">36028797018963989</span></div><div class="line"><span class="comment">// 36028797018963990</span></div></pre></td></tr></table></figure></p>
+<p>这种近似规则的说明可见<a href="https://en.wikipedia.org/wiki/Rounding#Round_half_to_even" target="_blank" rel="external">rounding</a>。</p>
+<p><strong>Help</strong><br>从<a href="https://en.wikipedia.org/wiki/IEEE_floating_point" target="_blank" rel="external">IEEE 754-2008</a>中关于近似的说明看，上述规则是默认的规则，似乎是可以由实现覆盖的。<br>譬如上面例子中 Math.pow(2, 53) + 1 与 Math.pow(2, 53) + 3 的近似就很难用这个默认规则说明。<br>也许是Chrome的实现并未使用这个默认规则？</p>
+<p><strong>Help</strong><br>9007199254740995 （<code>Math.pow(2, 53) + 3</code>）是不可表示的，但 18014398509481990 (=9007199254740995 * 2) 又是可表示的，这是为什么？</p>
+<h2 id="Number中几个特殊值含义"><a href="#Number中几个特殊值含义" class="headerlink" title="Number中几个特殊值含义"></a>Number中几个特殊值含义</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">Number</span>.EPSILON</div><div class="line"><span class="comment">// 2.220446049250313e-16</span></div><div class="line"><span class="comment">// 即二进制表示中有效数字，其含义是大于数字 1 的最小数字与 1 的差。</span></div><div class="line"></div><div class="line"><span class="built_in">Number</span>.MAX_SAFE_INTEGER</div><div class="line"><span class="comment">// 9007199254740991</span></div><div class="line"><span class="comment">// Math.pow(2, 53) - 1</span></div><div class="line"><span class="comment">// 连续整数区间的终点</span></div><div class="line"><span class="built_in">Number</span>.MIN_SAFE_INTEGER</div><div class="line"><span class="comment">// -9007199254740991</span></div><div class="line"></div><div class="line"><span class="built_in">Number</span>.NaN</div><div class="line"><span class="comment">// NaN</span></div><div class="line"><span class="built_in">Number</span>.POSITIVE_INFINITY</div><div class="line"><span class="comment">// Infinity</span></div><div class="line"><span class="built_in">Number</span>.NEGATIVE_INFINITY</div><div class="line"><span class="comment">// -Infinity</span></div><div class="line"></div><div class="line"><span class="built_in">Number</span>.MAX_VALUE</div><div class="line"><span class="comment">// 1.7976931348623157e+308</span></div><div class="line"><span class="comment">// (2 - Number.EPSILON) * Math.pow(2, 1023)</span></div><div class="line"><span class="built_in">Number</span>.MIN_VALUE</div><div class="line"><span class="comment">// 5e-324</span></div><div class="line"><span class="comment">// Number.EPSILON * Math.pow(2, -1022)</span></div></pre></td></tr></table></figure>
+<h2 id="使用浮点数容易出现的问题"><a href="#使用浮点数容易出现的问题" class="headerlink" title="使用浮点数容易出现的问题"></a>使用浮点数容易出现的问题</h2><h3 id="解析后端传过来的超过安全范围的整数"><a href="#解析后端传过来的超过安全范围的整数" class="headerlink" title="解析后端传过来的超过安全范围的整数"></a>解析后端传过来的超过安全范围的整数</h3><p>如果后端使用了64位的无符号整数，就有可能超过 2^53，前端在解析时就可能会丢失精度。<br>如果前端将丢失精度的值当作key值去查找后端提供的数据，就会找不到对应的数值。<br>因此，<strong>后端传给前端的整数不应当超过 2^53 </strong> 。</p>
+<h3 id="浮点数加减的结果精度不够"><a href="#浮点数加减的结果精度不够" class="headerlink" title="浮点数加减的结果精度不够"></a>浮点数加减的结果精度不够</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="number">0.2</span> + <span class="number">0.4</span></div><div class="line"><span class="comment">// 0.6000000000000001</span></div></pre></td></tr></table></figure>
+<p>前端用于展示的浮点数（如价格），如果需要计算，不应当直接使用原生的操作符。<br>解决方案可以参考<a href="https://github.com/zoubin/math-hacker" target="_blank" rel="external">math-hacker</a>。</p>
+<h3 id="Number-prototype-toFixed-precision-与Math-round-float-取整规则不一样"><a href="#Number-prototype-toFixed-precision-与Math-round-float-取整规则不一样" class="headerlink" title="Number.prototype.toFixed(precision)与Math.round(float)取整规则不一样"></a>Number.prototype.toFixed(precision)与Math.round(float)取整规则不一样</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">Math</span>.round(<span class="number">2.4</span>)</div><div class="line"><span class="comment">// 2</span></div><div class="line"><span class="built_in">Math</span>.round(<span class="number">2.5</span>)</div><div class="line"><span class="comment">// 3</span></div><div class="line"></div><div class="line">(<span class="number">2.385</span>).toFixed(<span class="number">2</span>)</div><div class="line"><span class="comment">// '2.38'</span></div><div class="line">(<span class="number">2.3851</span>).toFixed(<span class="number">2</span>)</div><div class="line"><span class="comment">// '2.39'</span></div><div class="line">(<span class="number">2.384</span>).toFixed(<span class="number">2</span>)</div><div class="line"><span class="comment">// '2.38'</span></div></pre></td></tr></table></figure>
+<p>因此，想通过toFixed去控制显示的小数位数可能会与用户的习惯（四舍五入）不一致。<br>解决方案可以参考<a href="https://github.com/zoubin/math-hacker" target="_blank" rel="external">math-hacker</a>。</p>
+<h3 id="位操作时会当作32位整数处理"><a href="#位操作时会当作32位整数处理" class="headerlink" title="位操作时会当作32位整数处理"></a>位操作时会当作32位整数处理</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">31</span>)</div><div class="line"><span class="comment">// 2147483648</span></div><div class="line"></div><div class="line"><span class="comment">// 取半</span></div><div class="line"><span class="number">2147483648</span> &gt;&gt; <span class="number">1</span></div><div class="line"><span class="comment">// -1073741824</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">31</span>) - <span class="number">2</span></div><div class="line"><span class="comment">// 2147483646</span></div><div class="line"></div><div class="line"><span class="comment">// 取半</span></div><div class="line"><span class="number">2147483646</span> &gt;&gt; <span class="number">1</span></div><div class="line"><span class="comment">// 1073741823</span></div></pre></td></tr></table></figure>
+<p>因此，位操作时需要确保不超过32位可表示的整数范围。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前后端大数精度不一致可能引起问题&quot;&gt;&lt;a href=&quot;#前后端大数精度不一致可能引起问题&quot; class=&quot;headerlink&quot; title=&quot;前后端大数精度不一致可能引起问题&quot;&gt;&lt;/a&gt;前后端大数精度不一致可能引起问题&lt;/h2&gt;&lt;p&gt;JS中Number类型以64
+    
+    </summary>
+    
+    
+      <category term="JavaScript" scheme="http://zoub.in/engineering/tags/JavaScript/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Node.js Stream - 程序设计</title>
+    <link href="http://zoub.in/engineering/2016/01/30/node-stream-programming/"/>
+    <id>http://zoub.in/engineering/2016/01/30/node-stream-programming/</id>
+    <published>2016-01-30T11:06:32.000Z</published>
+    <updated>2016-01-30T11:07:07.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在构建大型系统时，通常将其拆解为功能独立的若干部分，<br>这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。</p>
+<p>在unix中，shell通过管道<code>|</code>连接各部分，其输入输出的规范是文本流。<br>在<a href="https://nodejs.org/" target="_blank" rel="external">Node.js</a>中，内置的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>模块也实现了类似功能，组件间通过<code>.pipe()</code>连接。</p>
+<p>本系列试着从三个方面介绍<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>相关的内容，这三部分各自独立，无须从头至尾全部读完。</p>
+<ul>
+<li>第一部分：<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>入门。介绍<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>接口的基本使用。</li>
+<li>第二部分：<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层实现管窥。重点剖析<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层是如何支持流式数据处理的，以及<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>提供的<code>backpressure mechanism</code>是如何实现的。</li>
+<li>第三部分：介绍如何使用<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>进行程序设计。这部分会着重解析<a href="https://github.com/substack/node-browserify" target="_blank" rel="external">Browserify</a>和<a href="https://github.com/gulpjs/gulp" target="_blank" rel="external">Gulp</a>的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>设计模式，并基于<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>构建一个为<a href="https://git-scm.com/" target="_blank" rel="external">Git</a>仓库自动生成changelog的应用。</li>
+</ul>
+<h2 id="Stream程序设计"><a href="#Stream程序设计" class="headerlink" title="Stream程序设计"></a>Stream程序设计</h2><p>TBD</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="https://github.com/substack/browserify-handbook" target="_blank" rel="external">substack#browserify-handbook</a></li>
+<li><a href="https://github.com/zoubin/streamify-your-node-program" target="_blank" rel="external">zoubin#streamify-your-node-program</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;在构建大型系统时，通常将其拆解为功能独立的若干部分，&lt;br&gt;这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。&lt;
+    
+    </summary>
+    
+    
+      <category term="node" scheme="http://zoub.in/engineering/tags/node/"/>
+    
+      <category term="stream" scheme="http://zoub.in/engineering/tags/stream/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Node.js Stream - 原理</title>
+    <link href="http://zoub.in/engineering/2016/01/30/node-stream-principles/"/>
+    <id>http://zoub.in/engineering/2016/01/30/node-stream-principles/</id>
+    <published>2016-01-30T11:03:21.000Z</published>
+    <updated>2016-01-30T11:06:07.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在构建大型系统时，通常将其拆解为功能独立的若干部分，<br>这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。</p>
+<p>在unix中，shell通过管道<code>|</code>连接各部分，其输入输出的规范是文本流。<br>在<a href="https://nodejs.org/" target="_blank" rel="external">Node.js</a>中，内置的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>模块也实现了类似功能，组件间通过<code>.pipe()</code>连接。</p>
+<p>本系列试着从三个方面介绍<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>相关的内容，这三部分各自独立，无须从头至尾全部读完。</p>
+<ul>
+<li>第一部分：<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>入门。介绍<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>接口的基本使用。</li>
+<li>第二部分：<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层实现管窥。重点剖析<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层是如何支持流式数据处理的，以及<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>提供的<code>backpressure mechanism</code>是如何实现的。</li>
+<li>第三部分：介绍如何使用<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>进行程序设计。这部分会着重解析<a href="https://github.com/substack/node-browserify" target="_blank" rel="external">Browserify</a>和<a href="https://github.com/gulpjs/gulp" target="_blank" rel="external">Gulp</a>的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>设计模式，并基于<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>构建一个为<a href="https://git-scm.com/" target="_blank" rel="external">Git</a>仓库自动生成changelog的应用。</li>
+</ul>
+<h2 id="Stream原理"><a href="#Stream原理" class="headerlink" title="Stream原理"></a>Stream原理</h2><p>TBD</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="https://github.com/substack/browserify-handbook" target="_blank" rel="external">substack#browserify-handbook</a></li>
+<li><a href="https://github.com/zoubin/streamify-your-node-program" target="_blank" rel="external">zoubin#streamify-your-node-program</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;在构建大型系统时，通常将其拆解为功能独立的若干部分，&lt;br&gt;这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。&lt;
+    
+    </summary>
+    
+    
+      <category term="node" scheme="http://zoub.in/engineering/tags/node/"/>
+    
+      <category term="stream" scheme="http://zoub.in/engineering/tags/stream/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Node.js Stream - 入门</title>
+    <link href="http://zoub.in/engineering/2016/01/30/node-stream-basics/"/>
+    <id>http://zoub.in/engineering/2016/01/30/node-stream-basics/</id>
+    <published>2016-01-30T10:45:49.000Z</published>
+    <updated>2016-01-30T10:55:56.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在构建大型系统时，通常将其拆解为功能独立的若干部分，<br>这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。</p>
+<p>在unix中，shell通过管道<code>|</code>连接各部分，其输入输出的规范是文本流。<br>在<a href="https://nodejs.org/" target="_blank" rel="external">Node.js</a>中，内置的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>模块也实现了类似功能，组件间通过<code>.pipe()</code>连接。</p>
+<p>本系列试着从三个方面介绍<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>相关的内容，这三部分各自独立，无须从头至尾全部读完。</p>
+<ul>
+<li>第一部分：<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>入门。介绍<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>接口的基本使用。</li>
+<li>第二部分：<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层实现管窥。重点剖析<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层是如何支持流式数据处理的，以及<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>提供的<code>backpressure mechanism</code>是如何实现的。</li>
+<li>第三部分：介绍如何使用<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>进行程序设计。这部分会着重解析<a href="https://github.com/substack/node-browserify" target="_blank" rel="external">Browserify</a>和<a href="https://github.com/gulpjs/gulp" target="_blank" rel="external">Gulp</a>的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>设计模式，并基于<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>构建一个为<a href="https://git-scm.com/" target="_blank" rel="external">Git</a>仓库自动生成changelog的应用。</li>
+</ul>
+<h2 id="Stream入门"><a href="#Stream入门" class="headerlink" title="Stream入门"></a>Stream入门</h2><p><a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>是<a href="https://nodejs.org/" target="_blank" rel="external">Node.js</a>内置的一个模块，可通过以下方式加载其接口：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> stream = <span class="built_in">require</span>(<span class="string">'stream'</span>)</div><div class="line"></div><div class="line"><span class="keyword">var</span> Readable = stream.Readable</div><div class="line"><span class="keyword">var</span> Writable = stream.Writable</div><div class="line"><span class="keyword">var</span> Duplex = stream.Duplex</div><div class="line"><span class="keyword">var</span> Transform = stream.Transform</div></pre></td></tr></table></figure></p>
+<p><code>stream</code>暴露的这四个接口均是抽象类，需要实现特定的方法才能构造出可用的实例。</p>
+<ul>
+<li><a href="#Readable">Readable</a></li>
+<li><a href="#Writable">Writable</a></li>
+<li><a href="#Duplex">Duplex</a></li>
+<li><a href="#Transform">Transform</a></li>
+<li><a href="#流中的数据类型">流中的数据类型</a></li>
+</ul>
+<h3 id="Readable"><a href="#Readable" class="headerlink" title="Readable"></a>Readable</h3><p>创建可读流。</p>
+<p>实例：流式消耗<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" target="_blank" rel="external">迭代器</a>中的数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="meta">'use strict'</span></div><div class="line"><span class="keyword">const</span> Readable = <span class="built_in">require</span>(<span class="string">'stream'</span>).Readable</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ToReadable</span> <span class="keyword">extends</span> <span class="title">Readable</span> </span>&#123;</div><div class="line">  <span class="keyword">constructor</span>(iterable) &#123;</div><div class="line">    <span class="keyword">super</span>()</div><div class="line">    <span class="keyword">this</span>.iterator = <span class="keyword">new</span> <span class="function"><span class="keyword">function</span> *(<span class="params"></span>) </span>&#123;</div><div class="line">      <span class="keyword">yield</span> * iterable</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  _read() &#123;</div><div class="line">    <span class="keyword">const</span> res = <span class="keyword">this</span>.iterator.next()</div><div class="line">    <span class="keyword">if</span> (res.done) &#123;</div><div class="line">      <span class="keyword">this</span>.push(<span class="literal">null</span>)</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">      <span class="keyword">this</span>.push(res.value + <span class="string">'\n'</span>)</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="built_in">module</span>.exports = ToReadable</div></pre></td></tr></table></figure>
+<p>实际使用时，<code>new ToReadable(iterable)</code>会返回一个可读流，下游可以流式的消耗迭代器中的数据。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> iterable = <span class="function"><span class="keyword">function</span> *(<span class="params">limit</span>) </span>&#123;</div><div class="line">  <span class="keyword">while</span> (limit--) &#123;</div><div class="line">    <span class="keyword">yield</span> <span class="built_in">Math</span>.random()</div><div class="line">  &#125;</div><div class="line">&#125;(<span class="number">1e10</span>)</div><div class="line"></div><div class="line"><span class="keyword">const</span> readable = <span class="keyword">new</span> ToReadable(iterable)</div><div class="line">readable.on(<span class="string">'data'</span>, data =&gt; process.stdout.write(data))</div><div class="line">readable.on(<span class="string">'end'</span>, () =&gt; process.stdout.write(<span class="string">'DONE'</span>))</div></pre></td></tr></table></figure>
+<p>执行上述代码，将会有100亿个随机数源源不断的写进标准输出流。</p>
+<p>创建可读流时，需要继承<code>Readable</code>，并实现<code>_read</code>方法。</p>
+<ul>
+<li><code>_read</code>方法是从底层系统读取具体数据的逻辑，即生产数据的逻辑。</li>
+<li>在<code>_read</code>方法中，通过调用<code>push(data)</code>将数据放入可读流中供下游消耗。</li>
+<li>在<code>_read</code>方法中，可以同步地调用<code>push(data)</code>，也可以异步地调用。</li>
+<li>当全部数据都生产出来后，<strong>必须</strong>调用<code>push(null)</code>来结束可读流。</li>
+<li>流一旦结束，便不能再调用<code>push(data)</code>添加数据。</li>
+</ul>
+<p>可以通过监听<code>data</code>事件的方式消耗可读流。</p>
+<ul>
+<li>在首次监听其<code>data</code>事件后，<code>readable</code>便会持续不断的调用<code>_read()</code>，通过触发<code>data</code>事件将取得数据输出。</li>
+<li>第一次<code>data</code>事件会在下一个tick中触发，所以，可以安全地将数据输出前的逻辑放在事件监听后（同一个tick中）。</li>
+<li>当数据全部被消耗时，会触发<code>end</code>事件。这个事件是流结束的</li>
+</ul>
+<p>上面的例子中，<code>process.stdout</code>代表标准输出流，实际是一个可写流。下小节中介绍可写流的用法。</p>
+<h3 id="Writable"><a href="#Writable" class="headerlink" title="Writable"></a>Writable</h3><p>创建可写流。</p>
+<p>前面通过继承的方式去创建一类可读流，这种方法也适用于创建一类可写流，只是需要实现的是<code>_write(data, enc, next)</code>方法，而不是<code>_read()</code>方法。<br>有些简单的情况下不需要创建一类流，而只是一个流对象，可以用如下方式去做：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="meta">'use strict'</span></div><div class="line"><span class="keyword">const</span> Writable = <span class="built_in">require</span>(<span class="string">'stream'</span>).Writable</div><div class="line"></div><div class="line"><span class="keyword">const</span> writable = Writable()</div><div class="line">writable._write = <span class="function"><span class="keyword">function</span> (<span class="params">data, enc, next</span>) </span>&#123;</div><div class="line">  process.stdout.write(data.toString().toUpperCase())</div><div class="line">  process.nextTick(next)</div><div class="line">&#125;</div><div class="line"></div><div class="line">writable.on(<span class="string">'finish'</span>, () =&gt; process.stdout.write(<span class="string">'DONE'</span>))</div><div class="line"></div><div class="line">writable.write(<span class="string">'a'</span> + <span class="string">'\n'</span>)</div><div class="line">writable.write(<span class="string">'b'</span> + <span class="string">'\n'</span>)</div><div class="line">writable.end(<span class="string">'c'</span> + <span class="string">'\n'</span>)</div></pre></td></tr></table></figure>
+<p>在<code>_write</code>中，<strong>必须</strong>调用<code>next(err)</code>来通知流此次底层的写操作已经完成，可以开始处理下一个数据。</p>
+<p>上游通过调用<code>writable.write(data)</code>将数据写入可写流中，<code>write()</code>方法会调用<code>_write()</code>将<code>data</code>写入底层。当<code>_write</code>调用<code>next</code>方法时，表示底层的写操作完成，<code>writable</code>可以继续调用<code>_write</code>将新数据写入底层。</p>
+<p>与可读流的<code>push</code>方法类似，<code>next</code>的调用既可以是同步的，也可以是异步地。譬如这里就是在下一个tick中。</p>
+<p>上游<strong>必须</strong>调用<code>writable.end(data)</code>来结束可写流，<code>data</code>是可选的。此后，不能再调用<code>write</code>新增数据。</p>
+<p>在<code>end</code>方法调用后，当所有底层的写操作均完成时，会触发<code>finish</code>事件。</p>
+<h3 id="Duplex"><a href="#Duplex" class="headerlink" title="Duplex"></a>Duplex</h3><p>创建可读可写流。</p>
+<p><code>Duplex</code>实际上就是继承了<code>Readable</code>和<code>Writable</code>。<br>所以，一个<code>Duplex</code>对象既可当成可读流来使用（需要实现<code>_read</code>方法），也可当成可写流来使用（需要实现<code>_write</code>方法）。</p>
+<p>实现一个将字符流中小写字母转成大写的<code>Duplex</code>:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="meta">'use strict'</span></div><div class="line"><span class="keyword">const</span> Duplex = <span class="built_in">require</span>(<span class="string">'stream'</span>).Duplex</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ToUpperCase</span> <span class="keyword">extends</span> <span class="title">Duplex</span></span>&#123;</div><div class="line">  <span class="keyword">constructor</span>() &#123;</div><div class="line">    <span class="keyword">super</span>()</div><div class="line">    <span class="keyword">this</span>.chars = []</div><div class="line"></div><div class="line">    <span class="keyword">this</span>.once(<span class="string">'finish'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">      <span class="keyword">this</span>.push(<span class="literal">null</span>)</div><div class="line">    &#125;)</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  _read() &#123;</div><div class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.chars.length) &#123;</div><div class="line">      <span class="keyword">this</span>.push(<span class="keyword">this</span>._transform(<span class="keyword">this</span>.chars.shift()))</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  _write(data, enc, next) &#123;</div><div class="line">    <span class="keyword">this</span>.chars.push(data.toString())</div><div class="line">    <span class="keyword">this</span>._read()</div><div class="line">    next()</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  _transform(str) &#123;</div><div class="line">    <span class="keyword">return</span> str.toUpperCase()</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">const</span> duplex = <span class="keyword">new</span> ToUpperCase()</div><div class="line">duplex.on(<span class="string">'data'</span>, data =&gt; process.stdout.write(data))</div><div class="line"></div><div class="line">duplex.write(<span class="string">'hello, '</span>)</div><div class="line">duplex.write(<span class="string">'world!'</span>)</div><div class="line">duplex.end()</div></pre></td></tr></table></figure></p>
+<p>上面的代码中实现了<code>_read</code>方法，所以可以监听<code>data</code>事件来消耗<code>Duplex</code>产生的数据。<br>同时，又实现了<code>_write</code>方法，可作为下游去消耗数据。</p>
+<p>因为它既可读又可写，所以称它有两端：可写端和可读端。<br>可写端的接口与<code>Writable</code>一致，作为下游来使用；可读端的接口与<code>Readable</code>一致，作为上游来使用。</p>
+<p>但这里加了点有趣的逻辑。<br>上面这个特殊的<code>duplex</code>本身不产生数据（<code>this.chars</code>是空的），但当它的可写端拿到数据时（<code>_write</code>被调用），会将数据作一个变换（<code>_transform</code>方法将小写转成大写），再放到可读端去（调用<code>push</code>方法）。从而达到了将上游小写字母变换成大写字母输出给下游的目的。</p>
+<h3 id="Transform"><a href="#Transform" class="headerlink" title="Transform"></a>Transform</h3><p>从上面将小写转成大写的例子中，可以看出<code>Duplex</code>的可读端和可写端本身是隔离的，没有数据间的传递。<code>Transform</code>继承了<code>Duplex</code>，并实现了<code>_read</code>和<code>_write</code>方法，且其逻辑类似于例子中所示，目的就是将可读端和可写端打通，达到“变换数据”的目的。</p>
+<p>所以说<code>Transform</code>是一类特殊的可读可写流。</p>
+<p>用<code>Transform</code>重写上面的例子：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="meta">'use strict'</span></div><div class="line"><span class="keyword">const</span> Transform = <span class="built_in">require</span>(<span class="string">'stream'</span>).Transform</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ToUpperCase</span> <span class="keyword">extends</span> <span class="title">Transform</span> </span>&#123;</div><div class="line">  <span class="keyword">constructor</span>() &#123;</div><div class="line">    <span class="keyword">super</span>()</div><div class="line">  &#125;</div><div class="line">  _transform(data, enc, next) &#123;</div><div class="line">    <span class="keyword">this</span>.push(data.toString().toUpperCase())</div><div class="line">    next()</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">const</span> transform = <span class="keyword">new</span> ToUpperCase()</div><div class="line">transform.on(<span class="string">'data'</span>, data =&gt; process.stdout.write(data))</div><div class="line"></div><div class="line">transform.write(<span class="string">'hello, '</span>)</div><div class="line">transform.write(<span class="string">'world!'</span>)</div><div class="line">transform.end()</div></pre></td></tr></table></figure></p>
+<p><strong>注意</strong>：使用<code>Duplex</code>时，可以实现<code>_read</code>或<code>_write</code>，或两者都实现，但不要求实现<code>_transform</code>方法。使用<code>Transform</code>时，不要去实现<code>_read</code>和<code>_write</code>，而是要实现<code>_transform</code>。这个方法就是变换数据的逻辑。</p>
+<p><code>_transform</code>方法有点像集成了<code>_read</code>和<code>_write</code>的逻辑。<br>调用<code>push(data)</code>来为可读端提供数据，同步或异步地调用<code>next</code>方法来表示此次转换已经完成，可以开始处理下一个数据。</p>
+<h3 id="流中的数据类型"><a href="#流中的数据类型" class="headerlink" title="流中的数据类型"></a>流中的数据类型</h3><p>前面几节的例子中，经常看到调用<code>data.toString()</code>。这个<code>toString()</code>的调用是必须的吗？<br>本节介绍完如何控制流中的数据类型后，自然就有了答案。</p>
+<p>在shell中，用管道（<code>|</code>）连接上下游。上游输出的是文本流（标准输出流），下游输入的也是文本流（标准输入流）。在本文介绍的流中，默认也是如此。</p>
+<p>对于可读流来说，<code>push(data)</code>时，<code>data</code>只能是<code>String</code>或<code>Buffer</code>类型，而消耗时<code>data</code>事件输出的数据都是<code>Buffer</code>类型。对于可写流来说，<code>write(data)</code>时，<code>data</code>只能是<code>String</code>或<code>Buffer</code>类型，<code>_write(data)</code>调用时传进来的<code>data</code>都是<code>Buffer</code>类型。</p>
+<p>也就是说，流中的数据默认情况下都是<code>Buffer</code>类型。产生的数据一放入流中，便转成<code>Buffer</code>被消耗；写入的数据在传给底层写逻辑时，也被转成<code>Buffer</code>类型。</p>
+<p>但每个构造函数都接收一个配置对象，有一个<code>objectMode</code>的选项，一旦设置为<code>true</code>，就能出现“种瓜得瓜，种豆得豆”的效果。</p>
+<p><code>Readable</code>未设置<code>objectMode</code>时：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> Readable = <span class="built_in">require</span>(<span class="string">'stream'</span>).Readable</div><div class="line"></div><div class="line"><span class="keyword">const</span> readable = Readable()</div><div class="line"></div><div class="line">readable.push(<span class="string">'a'</span>)</div><div class="line">readable.push(<span class="string">'b'</span>)</div><div class="line">readable.push(<span class="literal">null</span>)</div><div class="line"></div><div class="line">readable.on(<span class="string">'data'</span>, data =&gt; <span class="built_in">console</span>.log(data))</div></pre></td></tr></table></figure></p>
+<p>输出：<br><figure class="highlight apache"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="section">&lt;Buffer 61&gt;</span></div><div class="line"><span class="section">&lt;Buffer 62&gt;</span></div></pre></td></tr></table></figure></p>
+<p><code>Readable</code>设置<code>objectMode</code>后：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">const</span> Readable = <span class="built_in">require</span>(<span class="string">'stream'</span>).Readable</div><div class="line"></div><div class="line"><span class="keyword">const</span> readable = Readable(&#123; objectMode: <span class="literal">true</span> &#125;)</div><div class="line"></div><div class="line">readable.push(<span class="string">'a'</span>)</div><div class="line">readable.push(<span class="string">'b'</span>)</div><div class="line">readable.push(&#123;&#125;)</div><div class="line">readable.push(<span class="literal">null</span>)</div><div class="line"></div><div class="line">readable.on(<span class="string">'data'</span>, data =&gt; <span class="built_in">console</span>.log(data))</div></pre></td></tr></table></figure></p>
+<p>输出：<br><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">a</span></div><div class="line"><span class="selector-tag">b</span></div><div class="line">&#123;&#125;</div></pre></td></tr></table></figure></p>
+<p>可见，设置<code>objectMode</code>后，<code>push(data)</code>的数据被原样的输出了。此时，可以生产任意类型的数据。</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="https://github.com/substack/browserify-handbook" target="_blank" rel="external">substack#browserify-handbook</a></li>
+<li><a href="https://github.com/zoubin/streamify-your-node-program" target="_blank" rel="external">zoubin#streamify-your-node-program</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h2&gt;&lt;p&gt;在构建大型系统时，通常将其拆解为功能独立的若干部分，&lt;br&gt;这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。&lt;
+    
+    </summary>
+    
+    
+      <category term="node" scheme="http://zoub.in/engineering/tags/node/"/>
+    
+      <category term="stream" scheme="http://zoub.in/engineering/tags/stream/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>http authentication</title>
+    <link href="http://zoub.in/engineering/2016/01/30/http-authentication/"/>
+    <id>http://zoub.in/engineering/2016/01/30/http-authentication/</id>
+    <published>2016-01-30T10:23:25.000Z</published>
+    <updated>2016-01-30T10:24:35.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>《<a href="http://www.staroceans.org/e-book/O&#39;Reilly%20-%20HTTP%20-%20The%20Definitive%20Guide.pdf" target="_blank" rel="external">HTTP: The Definitive Guide</a>》阅读笔记。</p>
+<blockquote>
+<p>Authentication means showing some proof of your identify.</p>
+</blockquote>
+<p>当用户访问某些隐私信息时，需要用户提供身份证明，通常就是填写用户名和密码。</p>
+<h2 id="Basic-Authentication"><a href="#Basic-Authentication" class="headerlink" title="Basic Authentication"></a>Basic Authentication</h2><p><img src="basic-authentication-example.png" alt="basic authentication"></p>
+<ul>
+<li>用户请求<code>/family/jeff.jpg</code></li>
+<li>服务器响应<code>401</code>，要求进行<code>basic authentication</code></li>
+<li>浏览器收到<code>401</code>响应，弹出对话框让用户输入用户名和密码。随后浏览器用冒号连接用户名和密码（<code>username:password</code>），用<a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="external">base-64</a>进行编码后添加<code>Authorization</code>头，再次请求<code>/family/jeff.jpg</code>。</li>
+<li>服务器解码后，验证通过，响应<code>200</code>。</li>
+</ul>
+<h3 id="安全隐患"><a href="#安全隐患" class="headerlink" title="安全隐患"></a>安全隐患</h3><ul>
+<li>用户名和密码使用<a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="external">base-64</a>编码传输，一旦被获取后很容易就解码。</li>
+<li>即便使用了一种非常难以解码的算法进行编码，第三方拿到加密的东西后，还是可以用这个加密的东西去向服务器发请求，根本不需要解码。称之为<code>replay</code>攻击。</li>
+<li>即便是在不重要的场合下使用<a href="#basic-authentication">basic authentication</a>，第三方拿到用户名密码后，可以去其它场合尝试。很多人会在不同场合使用同样的用户名和密码组合。</li>
+<li>网络代理也可以只修改请求内容，而不修改请求头，从而完全改变请求行为。</li>
+<li>还可以伪装服务器，诱使用户输入用户名和密码。</li>
+</ul>
+<p><a href="#basic-authentication">basic authentication</a>需要结合SSL等技术一起使用以满足安全性的要求。</p>
+<h2 id="Digest-Authentication"><a href="#Digest-Authentication" class="headerlink" title="Digest Authentication"></a>Digest Authentication</h2><p><img src="digest-authentication-example.png" alt="digest authentication"></p>
+<ul>
+<li>用户请求受保护文档。</li>
+<li>服务器要求提供用户名和密码的某种加密形式（密码摘要，a digest form of password）</li>
+<li>用户提供用户名和密码摘要</li>
+<li>服务器存储了所有用户的密码摘要，直接对比两个摘要是否吻合。</li>
+</ul>
+<h3 id="digest"><a href="#digest" class="headerlink" title="digest"></a>digest</h3><blockquote>
+<p>A digest is a “condensation of a body of information”.</p>
+</blockquote>
+<p>实际上就是一个单向映射，将无穷多可能的值映射到某个有限集合中。<br>譬如<a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>，将任意长度的字节映射成128位（的摘要）。</p>
+<p>这些映射最重要的特点是，如果不知道密码，需要花费很长的时间才能猜中对应的摘要；知道摘要，需要花费很长时间才能计算出密码。</p>
+<p><a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>的128位经常写成32个16进制的字符（每个代表4位）。也就是说，<a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>将任意长度的输入映射成32个字符。</p>
+<p>摘要本身还不能防止<code>replay</code>攻击，为此，服务器可以传给客户端一个<code>nonce</code>，客户端可以将其连接到密码摘要后面再发给服务器。<br>由于这个<code>nonce</code>可以变动频繁，或者是每次请求都不一样，即使拿到了这个“摘要:nonce”，也很快便会失效。</p>
+<p><a href="#digest-authentication">digest authentication</a>支持多种算法，RFC 2617中推荐<a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>和MD5-sess。默认是<a href="https://en.wikipedia.org/wiki/MD5" target="_blank" rel="external">MD5</a>。</p>
+<p><strong>计算公式</strong><br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">KD(H(A1), &lt;nonce&gt;<span class="symbol">:&lt;nc&gt;</span><span class="symbol">:&lt;cnonce&gt;</span><span class="symbol">:&lt;qop&gt;</span><span class="symbol">:H</span>(A2))</div></pre></td></tr></table></figure></p>
+<p>实际中，前面的公式展开后为：<br><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">MD5(MD5(A1)<span class="symbol">:&lt;nonce&gt;</span><span class="symbol">:&lt;nc&gt;</span><span class="symbol">:&lt;cnonce&gt;</span><span class="symbol">:&lt;qop&gt;</span><span class="symbol">:MD5</span>(A2))</div></pre></td></tr></table></figure></p>
+<h4 id="H与KD"><a href="#H与KD" class="headerlink" title="H与KD"></a>H与KD</h4><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">H(<span class="name">d</span>) = MD5(<span class="name">d</span>)</div><div class="line">KD(<span class="name">s</span>, d) = MD5(<span class="name">s</span><span class="symbol">:d</span>)</div></pre></td></tr></table></figure>
+<h4 id="A1与A2"><a href="#A1与A2" class="headerlink" title="A1与A2"></a>A1与A2</h4><p>请求信息被分为两部分：</p>
+<ul>
+<li><code>A1</code>代表秘密相关的部分</li>
+<li><code>A2</code>代表秘密不相关的部分</li>
+</ul>
+<p>RFC 2617定义了两种方式来计算<code>A1</code>。</p>
+<ul>
+<li><p><code>MD5</code>。每次请求都需要执行一次单向哈希函数。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">A1 = &lt;user&gt;<span class="symbol">:&lt;realm&gt;</span><span class="symbol">:&lt;password&gt;</span></div></pre></td></tr></table></figure>
+</li>
+<li><p><code>MD5-sess</code>。哈希函数只在WWW-Authenticate握手时执行一次。</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">A1 = MD5(&lt;user&gt;<span class="symbol">:&lt;realm&gt;</span><span class="symbol">:&lt;password&gt;</span>)<span class="symbol">:&lt;nonce&gt;</span><span class="symbol">:&lt;cnonce&gt;</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><code>A2</code>代表的是消息本身，如URL，请求方法（request method），消息实体（entity body）。<br>可用来防止消息被恶意篡改。</p>
+<p>RFC 2617也定义了两种计算<code>A2</code>的方式。</p>
+<ul>
+<li><p><code>qop=&quot;auth&quot;</code>。只包含URL和请求方法。</p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">A2 = &lt;request-<span class="function"><span class="keyword">method</span>&gt;:</span>&lt;uri-directive-value&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p><code>qop=&quot;auth-init&quot;</code>。添加了消息实体。</p>
+<figure class="highlight oxygene"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">A2 = &lt;request-<span class="function"><span class="keyword">method</span>&gt;:</span>&lt;uri-directive-value&gt;:H(&lt;request-entity-body&gt;)</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><code>qop</code>即<code>quality of protection</code>。</p>
+<h4 id="nonce"><a href="#nonce" class="headerlink" title="nonce"></a>nonce</h4><p>RFC 2617推荐的生成方法：<br><figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">nonce = BASE64(<span class="name">time-stamp</span> H(<span class="name">time-stamp</span> <span class="string">":"</span> ETag <span class="string">":"</span> private-key))</div></pre></td></tr></table></figure></p>
+<p><code>time-stamp</code>为时间戳，或是其它不会重复的值。<br><code>ETag</code>即对应的请求头值，和请求实体绑定。<br><code>private-key</code>是只有服务器知道的秘密。</p>
+<p>服务器在收到客户端的<code>Authorization</code>请求头后，重新计算哈希部分（<code>H()</code>），<br>并检查其是否与<code>Authorization</code>头中的<code>nonce</code>值吻合。</p>
+<p>服务器在计算哈希进行对比验证时，需要上次的<code>time-stamp</code>，<br>可以对<code>Authorization</code>头中的<code>nonce</code>先进行<a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="external">base-64</a>解码，去掉后面32个字符得到。</p>
+<p><code>ETag</code>可从请求头中取得。<code>private-key</code>应该是不变的吧。</p>
+<h3 id="其它安全考虑"><a href="#其它安全考虑" class="headerlink" title="其它安全考虑"></a>其它安全考虑</h3><h4 id="请求头篡改"><a href="#请求头篡改" class="headerlink" title="请求头篡改"></a>请求头篡改</h4><p><a href="#digest-authentication">digest authentication</a>只对WWW-Authenticate和Authorization请求头进行了一定程度的防护，要想保证其它请求头不被篡改，需要对请求头进行端到端加密或数字签名。</p>
+<h4 id="Replay-Attacks"><a href="#Replay-Attacks" class="headerlink" title="Replay Attacks"></a>Replay Attacks</h4><p>blabla</p>
+<p>推荐做法是<code>nonce</code>值只对一次<code>transaction</code>有效，且设置<code>timeout</code>。</p>
+<h4 id="Dictionary-Attacks"><a href="#Dictionary-Attacks" class="headerlink" title="Dictionary Attacks"></a>Dictionary Attacks</h4><p>第三方可以长时间地监听<code>http transaction</code>，搜集<code>nonce/response</code>对，然后用密码推测程序去猜密码。<br>为了应对这种攻击，最好地策略是使用复杂密码，且定期换密码。</p>
+<h4 id="Hostile-Proxies-and-Man-in-the-Middle-Attacks"><a href="#Hostile-Proxies-and-Man-in-the-Middle-Attacks" class="headerlink" title="Hostile Proxies and Man-in-the-Middle Attacks"></a>Hostile Proxies and Man-in-the-Middle Attacks</h4><p>很多请求都经过代理，代理便能进行监听，或者是将认证协议改成<a href="#basic-authentication">basic authentication</a>。</p>
+<p>这个问题除了使用SSL外，基本无解。</p>
+<h4 id="Chosen-Plaintext-Attacks"><a href="#Chosen-Plaintext-Attacks" class="headerlink" title="Chosen Plaintext Attacks"></a>Chosen Plaintext Attacks</h4><p>客户端利用服务器提供的<code>nonce</code>来计算其<code>response</code>，<br>所以，代理或服务器便可能在<code>nonce</code>上做手脚来获得密码。</p>
+<p><strong>Precomputed dictionary attacks</strong></p>
+<p>结合了Dictionary Attacks的特点。<br>事先利用一些<code>nonce</code>和密码生成对应的<code>response</code>，<br>然后将这些<code>nonce</code>发给客户端，收到<code>response</code>后再去查，一旦匹配上便知道了密码。</p>
+<p><strong>Batched brute-force attacks</strong></p>
+<p>与前一种方式的不同之处在于，并不是从事先算好的<code>response</code>中去找匹配，<br>而是直接根据<code>response</code>去穷举。</p>
+<p>此种攻击容易破解，只需要开启<code>cnonce</code>。<br>这个值是由客户端计算出来的，根据它去计算<code>response</code>便基本防止了从<code>nonce</code>和<code>response</code>去猜密码的可能性。</p>
+<h4 id="Storing-Passwords"><a href="#Storing-Passwords" class="headerlink" title="Storing Passwords"></a>Storing Passwords</h4><p><a href="#digest-authentication">digest authentication</a>机制将用户的<code>response</code>与服务器存储的信息做对比，<br>这些信息（通常是用户名，<code>H(A1)</code>）一旦被暴露，从前面的公式可以看出，便可以不需要解出密码，而直接根据服务器的<code>nonce</code>去计算<code>response</code>，进行攻击。</p>
+<p>这种攻击基本上也是无解的，减轻的方法是：</p>
+<ul>
+<li>服务器将这些信息更妥善的保管</li>
+<li>尽量设置好<code>realm</code>，一旦被暴，影响也是局部的。</li>
+</ul>
+<h3 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h3><p><img src="basic-vs-digest.png" alt="basic-vs-digest"></p>
+<ul>
+<li>不明文传输密码。</li>
+<li>防止<code>replay</code>攻击。</li>
+<li>防止恶意修改请求内容。</li>
+<li>及其它一些常见的攻击手段。</li>
+</ul>
+<h2 id="真正安全的可行方案"><a href="#真正安全的可行方案" class="headerlink" title="真正安全的可行方案"></a>真正安全的可行方案</h2><p>真正安全地作法就是使用SSL。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;《&lt;a href=&quot;http://www.staroceans.org/e-book/O&amp;#39;Reilly%20-%20HTTP%20-%20The%20Definitive%20Guide.pdf&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;HTT
+    
+    </summary>
+    
+    
+      <category term="HTTP" scheme="http://zoub.in/engineering/tags/HTTP/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JS中一些有关原型的问题</title>
+    <link href="http://zoub.in/engineering/2015/11/18/prototype-in-js/"/>
+    <id>http://zoub.in/engineering/2015/11/18/prototype-in-js/</id>
+    <published>2015-11-18T05:59:00.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="obj-hasOwnProperty-‘proto‘-false"><a href="#obj-hasOwnProperty-‘proto‘-false" class="headerlink" title="obj.hasOwnProperty(‘proto‘) === false"></a>obj.hasOwnProperty(‘<strong>proto</strong>‘) === false</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> o = &#123;&#125;</div><div class="line"></div><div class="line">print(<span class="string">'toString'</span>, o)</div><div class="line">o.toString = <span class="literal">true</span></div><div class="line">print(<span class="string">'toString'</span>, o)</div><div class="line"></div><div class="line">print(<span class="string">'__proto__'</span>, o)</div><div class="line">o.__proto__ = <span class="literal">true</span></div><div class="line">print(<span class="string">'__proto__'</span>, o)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">print</span>(<span class="params">name, obj</span>) </span>&#123;</div><div class="line">  <span class="built_in">console</span>.log(</div><div class="line">    <span class="string">'name:'</span>, name,</div><div class="line">    <span class="string">','</span>,</div><div class="line">    <span class="string">'typeof:'</span>, <span class="keyword">typeof</span> obj[name],</div><div class="line">    <span class="string">','</span>,</div><div class="line">    <span class="string">'hasOwnProperty:'</span>, <span class="built_in">Object</span>.prototype.hasOwnProperty.call(obj, name)</div><div class="line">  )</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>output:</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> function , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div><div class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> <span class="keyword">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></div><div class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> object , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div><div class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> object , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div></pre></td></tr></table></figure>
+<h2 id="Object-create-null"><a href="#Object-create-null" class="headerlink" title="Object.create(null)"></a>Object.create(null)</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> o = <span class="built_in">Object</span>.create(<span class="literal">null</span>)</div><div class="line"></div><div class="line">print(<span class="string">'toString'</span>, o)</div><div class="line">o.toString = <span class="literal">true</span></div><div class="line">print(<span class="string">'toString'</span>, o)</div><div class="line"></div><div class="line">print(<span class="string">'__proto__'</span>, o)</div><div class="line">o.__proto__ = <span class="literal">true</span></div><div class="line">print(<span class="string">'__proto__'</span>, o)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">print</span>(<span class="params">name, obj</span>) </span>&#123;</div><div class="line">  <span class="built_in">console</span>.log(</div><div class="line">    <span class="string">'name:'</span>, name,</div><div class="line">    <span class="string">','</span>,</div><div class="line">    <span class="string">'typeof:'</span>, <span class="keyword">typeof</span> obj[name],</div><div class="line">    <span class="string">','</span>,</div><div class="line">    <span class="string">'hasOwnProperty:'</span>, <span class="built_in">Object</span>.prototype.hasOwnProperty.call(obj, name)</div><div class="line">  )</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>output:</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> undefined , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div><div class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> <span class="keyword">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></div><div class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> undefined , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div><div class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> <span class="keyword">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;obj-hasOwnProperty-‘proto‘-false&quot;&gt;&lt;a href=&quot;#obj-hasOwnProperty-‘proto‘-false&quot; class=&quot;headerlink&quot; title=&quot;obj.hasOwnProperty(‘proto‘) 
+    
+    </summary>
+    
+    
+      <category term="javascript" scheme="http://zoub.in/engineering/tags/javascript/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>css cascading</title>
+    <link href="http://zoub.in/engineering/2015/09/02/css-cascading/"/>
+    <id>http://zoub.in/engineering/2015/09/02/css-cascading/</id>
+    <published>2015-09-02T10:51:27.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<!-- toc -->
+<h2 id="Processing-Values"><a href="#Processing-Values" class="headerlink" title="Processing Values"></a>Processing Values</h2><blockquote>
+<p>One of the fundamental design principles of CSS is cascading, which allows several style sheets to influence the presentation of a document. When different declarations try to set a value for the same element/property combination, the conflicts must somehow be resolved.</p>
+<p>The opposite problem arises when no declarations try to set a the value for an element/property combination. In this case, a value is be found by way of inheritance or by looking at the property’s initial value.</p>
+<p>The <strong>cascading</strong> and <strong>defaulting</strong> process takes a set of declarations as input, and outputs a specified value for each property on each element.</p>
+</blockquote>
+<p><img src="process-value.png" alt="value"></p>
+<h2 id="Cascading"><a href="#Cascading" class="headerlink" title="Cascading"></a>Cascading</h2><blockquote>
+<p>The cascade takes an unordered list of declared values for a given property on a given element, sorts them by their declaration’s precedence as determined below, and outputs a single cascaded value.</p>
+</blockquote>
+<ul>
+<li>Origin and Importance</li>
+<li>Specificity</li>
+<li>Order of Appearance</li>
+</ul>
+<h3 id="Origin-and-Importance"><a href="#Origin-and-Importance" class="headerlink" title="Origin and Importance"></a>Origin and Importance</h3><p>See <a href="https://drafts.csswg.org/css-cascade/#cascade-origin" target="_blank" rel="external">here</a></p>
+<h3 id="Specificity"><a href="#Specificity" class="headerlink" title="Specificity"></a>Specificity</h3><ul>
+<li>count the number of ID selectors in the selector (= A)</li>
+<li>count the number of class selectors, attributes selectors, and pseudo-classes in the selector (= B)</li>
+<li>count the number of type selectors and pseudo-elements in the selector (= C)</li>
+<li>ignore the universal selector</li>
+</ul>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">*               <span class="comment">/* a=0 b=0 c=0 */</span></div><div class="line"><span class="selector-tag">LI</span>              <span class="comment">/* a=0 b=0 c=1 */</span></div><div class="line"><span class="selector-tag">UL</span> <span class="selector-tag">LI</span>           <span class="comment">/* a=0 b=0 c=2 */</span></div><div class="line"><span class="selector-tag">UL</span> <span class="selector-tag">OL</span>+<span class="selector-tag">LI</span>        <span class="comment">/* a=0 b=0 c=3 */</span></div><div class="line"><span class="selector-tag">H1</span> + *<span class="selector-attr">[REL=up]</span>  <span class="comment">/* a=0 b=1 c=1 */</span></div><div class="line"><span class="selector-tag">UL</span> <span class="selector-tag">OL</span> <span class="selector-tag">LI</span><span class="selector-class">.red</span>    <span class="comment">/* a=0 b=1 c=3 */</span></div><div class="line"><span class="selector-tag">LI</span><span class="selector-class">.red</span><span class="selector-class">.level</span>    <span class="comment">/* a=0 b=2 c=1 */</span></div><div class="line"><span class="selector-id">#x34y</span>           <span class="comment">/* a=1 b=0 c=0 */</span></div></pre></td></tr></table></figure>
+<h3 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h3><ul>
+<li><a href="https://jsbin.com/nusatu/edit?html,css,output" target="_blank" rel="external">https://jsbin.com/nusatu/edit?html,css,output</a></li>
+</ul>
+<h3 id="Order-of-Appearance"><a href="#Order-of-Appearance" class="headerlink" title="Order of Appearance"></a>Order of Appearance</h3><blockquote>
+<p>The last declaration in document order wins.</p>
+</blockquote>
+<ul>
+<li>Declarations from imported style sheets are ordered as if their style sheets were substituted in place of the @import rule.</li>
+<li>Declarations from style sheets independently linked by the originating document are treated as if they were concatenated in linking order, as determined by the host document language.</li>
+<li>Declarations from style attributes are ordered according to the document order of the element the style attribute appears on, and are all placed after any style sheets.</li>
+</ul>
+<h4 id="the-import-rule"><a href="#the-import-rule" class="headerlink" title="the @import rule"></a>the <code>@import</code> rule</h4><blockquote>
+<p>If an @import rule refers to a valid stylesheet, user agents must treat the contents of the stylesheet as if they were written in place of the @import rule.</p>
+<p>Any @import rules must precede all other at-rules and style rules in a style sheet (besides @charset, which must be the first thing in the style sheet if it exists), or else the @import rule is invalid. </p>
+</blockquote>
+<h3 id="the-important-annotation"><a href="#the-important-annotation" class="headerlink" title="the !important annotation"></a>the <code>!important</code> annotation</h3><h2 id="Defaulting"><a href="#Defaulting" class="headerlink" title="Defaulting"></a>Defaulting</h2><h3 id="Initial-Values"><a href="#Initial-Values" class="headerlink" title="Initial Values"></a>Initial Values</h3><blockquote>
+<p>Each property has an initial value, defined in the property’s definition table. If the property is not an inherited property, and the cascade does not result in a value, then the specified value of the property is its initial value.</p>
+</blockquote>
+<p><a href="https://drafts.csswg.org/css-box-3/#the-width-and-height-properties" target="_blank" rel="external">width</a></p>
+<h3 id="Inheritance"><a href="#Inheritance" class="headerlink" title="Inheritance"></a>Inheritance</h3><blockquote>
+<p>Inheritance propagates property values from parent elements to their children.</p>
+<p>The inherited value of a property on an element is the <strong>computed value</strong> of the property on the element’s parent element.</p>
+</blockquote>
+<p><a href="http://www.w3.org/TR/CSS2/visudet.html#propdef-line-height" target="_blank" rel="external">line-height</a></p>
+<h2 id="More-info"><a href="#More-info" class="headerlink" title="More info"></a>More info</h2><ul>
+<li><a href="http://www.w3.org/TR/css-cascade-4/" target="_blank" rel="external">http://www.w3.org/TR/css-cascade-4/</a></li>
+<li><a href="https://drafts.csswg.org/css-cascade/" target="_blank" rel="external">https://drafts.csswg.org/css-cascade/</a></li>
+<li><a href="https://drafts.csswg.org/css-cascade-3/" target="_blank" rel="external">https://drafts.csswg.org/css-cascade-3/</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;!-- toc --&gt;
+&lt;h2 id=&quot;Processing-Values&quot;&gt;&lt;a href=&quot;#Processing-Values&quot; class=&quot;headerlink&quot; title=&quot;Processing Values&quot;&gt;&lt;/a&gt;Processing Values&lt;/h2&gt;
+    
+    </summary>
+    
+    
+      <category term="css" scheme="http://zoub.in/engineering/tags/css/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>css layout</title>
+    <link href="http://zoub.in/engineering/2015/09/02/css-layout/"/>
+    <id>http://zoub.in/engineering/2015/09/02/css-layout/</id>
+    <published>2015-09-02T10:16:13.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<!-- toc -->
+<h2 id="Visual-Formatting-Model"><a href="#Visual-Formatting-Model" class="headerlink" title="Visual Formatting Model"></a>Visual Formatting Model</h2><blockquote>
+<p>In the visual formatting model, each element in the document tree generates zero or more boxes according to the box model.</p>
+</blockquote>
+<p>The layout of these boxes is governed by:</p>
+<ul>
+<li>box dimensions and type.</li>
+<li>positioning scheme (normal flow, float, and absolute positioning).</li>
+<li>relationships between elements in the document tree.</li>
+<li>external information (e.g., viewport size, intrinsic dimensions of images, etc.).</li>
+</ul>
+<h2 id="Viewport"><a href="#Viewport" class="headerlink" title="Viewport"></a>Viewport</h2><blockquote>
+<p>User agents for continuous media generally offer users a viewport (a window or other viewing area on the screen) through which users consult a document.</p>
+</blockquote>
+<h2 id="Containing-block"><a href="#Containing-block" class="headerlink" title="Containing block"></a>Containing block</h2><blockquote>
+<p>The position and size of an element’s box(es) are sometimes calculated relative to a certain rectangle, called the containing block of the element.</p>
+</blockquote>
+<p><img src="containing-block.png" alt="containing-block"></p>
+<h3 id="Initial-containing-block"><a href="#Initial-containing-block" class="headerlink" title="Initial containing block"></a>Initial containing block</h3><blockquote>
+<p>The containing block in which the root element lives is a rectangle called the initial containing block</p>
+<p>it has the dimensions of the viewport and is anchored at the canvas origin</p>
+</blockquote>
+<h2 id="Box-type"><a href="#Box-type" class="headerlink" title="Box type"></a>Box type</h2><blockquote>
+<p>Block-level boxes are boxes that participate in a block formatting context.</p>
+<p>An inline box is one that is both inline-level and whose contents participate in its containing inline formatting context.</p>
+</blockquote>
+<p>一个元素一般会产生一个盒子，有些情况下会产生多个（如list-item），但用于定位的一定是其中的主盒子（principal box）。可见，元素的类型会影响其生成的盒子类型。</p>
+<p>如果一个元素在渲染后总是形成一个新的内容块（block），则称其为块级元素(block-level element)，如<code>p</code>, <code>div</code>等（假设无css修改样式）。</p>
+<p>如果一个元素的内容可能分布在多行，则称其为行内元素（inline-level element），如<code>span</code>, <code>em</code>等。</p>
+<p>另外，就盒子中的内容而言，如果全是块级盒子，或者该盒子创建了一个IFC (inline formatting context)，则称其为block container box。譬如常见的<code>div</code>, <code>p</code>, <code>inline-block</code>。</p>
+<p>除table box，replaced box外，block-level box都是block container box，也被称为block box。而inline-level box中non-replaced inline-block和non-replaced table-cell是block container box。</p>
+<h3 id="‘display’"><a href="#‘display’" class="headerlink" title="‘display’"></a>‘display’</h3><p>主要影响盒子类型的还是<code>display</code>属性。因此，我们可以通过将一个<code>span</code>的<code>display</code>设为<code>block</code>而将其渲染成块级元素的样子。</p>
+<p><img src="box-type.png" alt="box-type"></p>
+<h3 id="Computed-‘display’"><a href="#Computed-‘display’" class="headerlink" title="Computed ‘display’"></a>Computed ‘display’</h3><p><a href="https://drafts.csswg.org/css-position/#dis-pos-flo" target="_blank" rel="external">Relationships between display, position, and float</a></p>
+<p><img src="computed-display.png" alt="computed-display"></p>
+<h2 id="Positioning-schemes"><a href="#Positioning-schemes" class="headerlink" title="Positioning schemes"></a>Positioning schemes</h2><p>CSS2.1中有三种定位方式：</p>
+<ol>
+<li>正常流（normal flow）</li>
+<li>浮动（floats）</li>
+<li>绝对定位（absolute positioning）</li>
+</ol>
+<p>可以通过<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-position" target="_blank" rel="external">‘position’</a>属性以及<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-float" target="_blank" rel="external">‘float’</a>属性来选择使用哪种定位。</p>
+<h2 id="Normal-flow"><a href="#Normal-flow" class="headerlink" title="Normal flow"></a>Normal flow</h2><blockquote>
+<p>In CSS, normal flow includes block formatting of block-level boxes, inline formatting of inline-level boxes, and relative and sticky positioning of block-level and inline-level boxes.</p>
+<p>Boxes in the normal flow belong to a formatting context, which may be block or inline, but not both simultaneously</p>
+</blockquote>
+<p>正常流排列盒子的方式有两种：横排(horizontal)和竖排(vertical)。</p>
+<ul>
+<li><a href="https://jsbin.com/lepayu/edit?html,css,output" target="_blank" rel="external">正常流中的横排与竖排</a></li>
+</ul>
+<h3 id="Block-formatting-context"><a href="#Block-formatting-context" class="headerlink" title="Block formatting context"></a>Block formatting context</h3><p>竖排的盒子总是独占一行，被称为块级盒子(block-level box)。排列在一起的块级盒子所占用的空间称为block formatting context (BFC)。也可以说，用来竖排块级盒子的空间就是BFC。</p>
+<p>BFC中盒子的排列特点：</p>
+<ol>
+<li>盒子独占一行，从包含块(containing block)的顶部开始向下垂直分布。</li>
+<li>每个盒子的left margin-edge (left outer-edge)总是与包含块的左边接邻。</li>
+<li>兄弟盒子（sibling boxes）间的垂直距离取决于<code>margin</code>属性。垂直方向上相邻的<code>margin</code>遵循margin-collapse规则。</li>
+</ol>
+<h4 id="Examples"><a href="#Examples" class="headerlink" title="Examples"></a>Examples</h4><ul>
+<li><a href="https://jsbin.com/cugowe/1/edit?html,css,output" target="_blank" rel="external">BFC中盒子的垂直排列</a></li>
+<li><a href="https://jsbin.com/satogu/edit?html,css,output" target="_blank" rel="external">BFC中盒子的外沿</a></li>
+</ul>
+<p>以下元素会创建BFC:</p>
+<ul>
+<li>floats</li>
+<li>absolute positioned elements</li>
+<li>block containers (such as inline-blocks, table-cells, and table-captions) that are not block boxes</li>
+<li>block boxes with ‘overflow’ other than ‘visible’</li>
+</ul>
+<p>创建了BFC的盒子拥有的特性：</p>
+<ul>
+<li>内部BFC中的文本排列不受外部浮动元素的影响。</li>
+<li>不与子元素发生margin collapse.</li>
+<li>盒子的高度计算时包括了该BFC中的浮动元素。</li>
+</ul>
+<h4 id="Examples-1"><a href="#Examples-1" class="headerlink" title="Examples"></a>Examples</h4><ul>
+<li><a href="https://jsbin.com/satogu/edit?html,css,output" target="_blank" rel="external">BFC中文本与外部浮动</a></li>
+<li><a href="https://jsbin.com/cugowe/edit?html,css,output" target="_blank" rel="external">BFC创建者与后代元素的margin collapse</a></li>
+</ul>
+<h3 id="Inline-formatting-contexts"><a href="#Inline-formatting-contexts" class="headerlink" title="Inline formatting contexts"></a>Inline formatting contexts</h3><blockquote>
+<p>In an inline formatting context, boxes are laid out horizontally, one after the other, beginning at the top of a containing block.</p>
+</blockquote>
+<p>由block container box创建，用于排列inline-level box。其重要的特性是横向一行一行的排，每行的高度由各元素的<code>vertical-align</code>和<code>line-height</code>决定。</p>
+<p>需要注意的是，用于行内排列的盒子并非盒模型确定的盒子。</p>
+<p><img src="inline-box.png" alt="inline-box"></p>
+<h4 id="Line-height-calculations"><a href="#Line-height-calculations" class="headerlink" title="Line height calculations"></a>Line height calculations</h4><blockquote>
+<p>user agents flow inline-level boxes into a vertical stack of line boxes</p>
+</blockquote>
+<p>行高的确定步骤：</p>
+<ol>
+<li>计算当前行中所有inline-level box的高度。即其<a href="http://www.w3.org/TR/CSS2/visudet.html#line-height" target="_blank" rel="external">line-height</a></li>
+<li>根据每个inline-level box的<a href="http://www.w3.org/TR/CSS2/visudet.html#propdef-vertical-align" target="_blank" rel="external">vertical-align</a>属性在垂直方向上排列</li>
+<li>行高即所有盒子中最靠上的边与最靠下的边的距离。</li>
+</ol>
+<p><img src="vertical-align.png" alt="vertical-align"></p>
+<p><strong>NOTE</strong>: 行高只与line-height和vertical-align有关，与盒子的maring, padding, border, height等无关。</p>
+<h4 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h4><ul>
+<li><a href="https://jsbin.com/nuyeke/edit?html,css,output" target="_blank" rel="external">vertical-align与line-height对行高的影响</a></li>
+</ul>
+<h3 id="Relative-positioning"><a href="#Relative-positioning" class="headerlink" title="Relative positioning"></a>Relative positioning</h3><p>在盒子按正常流的方式定位好后，可以使用<code>position:relative</code>进行偏移。</p>
+<p>这里重要的点是：</p>
+<ol>
+<li>盒子是相对其在正常流中的位置进行偏移。</li>
+<li>其它元素的定位不受该盒子偏移影响。但可能会有重叠现象发生。</li>
+</ol>
+<h2 id="Floats"><a href="#Floats" class="headerlink" title="Floats"></a>Floats</h2><blockquote>
+<p>In the float model, a box is first laid out according to the normal flow, then taken out of the flow and positioned, typically to the left or right. Content may flow along the side of a float.</p>
+<p>The border box of a table, a block-level replaced element, or an element in the normal flow that establishes a new block formatting context (such as an element with ‘overflow’ other than ‘visible’) must not overlap the margin box of any floats in the same block formatting context as the element itself.</p>
+</blockquote>
+<p>浮动，即将盒子移动到当前行的最左或最右的位置。</p>
+<h3 id="浮动的特点"><a href="#浮动的特点" class="headerlink" title="浮动的特点"></a>浮动的特点</h3><p>详细的浮动说明见<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-float" target="_blank" rel="external">‘float’</a>属性说明。</p>
+<h4 id="对其它元素的影响"><a href="#对其它元素的影响" class="headerlink" title="对其它元素的影响"></a>对其它元素的影响</h4><ul>
+<li>其它元素的定位会忽略浮动元素的存在</li>
+<li>行宽要为浮动元素的margin box挪空间而变短，但盒子的宽度不变。</li>
+<li>创建了BFC的盒子其border box不能与所在BFC中浮动元素的margin box有交叠，因此其宽度可能变短。</li>
+</ul>
+<h4 id="浮动元素的outer-edge受其containing-block的限制"><a href="#浮动元素的outer-edge受其containing-block的限制" class="headerlink" title="浮动元素的outer edge受其containing block的限制"></a>浮动元素的outer edge受其containing block的限制</h4><ul>
+<li>浮动元素的margin box不能伸出其containing block的上边、左边、右边。</li>
+<li>尽可能靠上</li>
+<li>左浮动元素尽可能地靠左</li>
+<li>右浮动元素尽可能地靠右</li>
+</ul>
+<h4 id="浮动元素之间可能互相限制"><a href="#浮动元素之间可能互相限制" class="headerlink" title="浮动元素之间可能互相限制"></a>浮动元素之间可能互相限制</h4><ul>
+<li>左浮动元素必须在前面左浮动元素的右边或下边。</li>
+<li>右浮动元素必须在前面右浮动元素的左边或下边。</li>
+<li>左浮动元素必须在相邻右浮动元素的左边。</li>
+<li>右浮动元素必须在相邻左浮动元素的右边。</li>
+</ul>
+<h4 id="受前面元素的限制"><a href="#受前面元素的限制" class="headerlink" title="受前面元素的限制"></a>受前面元素的限制</h4><ul>
+<li>不能比文档中在前的block (block-level box, block container)、浮动元素更靠上</li>
+<li>不能比文档中在前的line box更靠上</li>
+</ul>
+<h5 id="Example-1"><a href="#Example-1" class="headerlink" title="Example"></a>Example</h5><ul>
+<li><a href="https://jsbin.com/hivafo/edit?html,css,output" target="_blank" rel="external">float与前后元素</a></li>
+</ul>
+<h3 id="清除浮动"><a href="#清除浮动" class="headerlink" title="清除浮动"></a>清除浮动</h3><p>浮动带来的效果：</p>
+<ol>
+<li>文本可能绕图片排列，不呈现矩形块状。</li>
+<li>父元素高度的计算可能不包括浮动元素的高度，出现塌陷现象。</li>
+<li>创建了BFC的盒子，其border box可能变窄。</li>
+</ol>
+<p>一般说clear a float，指的是使clear space for the target element，即让目标元素和浮动元素保持一定距离以免受上述效果。</p>
+<p>可使用<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-clear" target="_blank" rel="external">clear</a>属性来达到目的。另外，使某些元素创建BFC也能达到某些效果。</p>
+<h2 id="Absolute-positioning"><a href="#Absolute-positioning" class="headerlink" title="Absolute positioning"></a>Absolute positioning</h2><blockquote>
+<p>In the absolute positioning model, a box is removed from the normal flow entirely (it has no impact on later siblings) and assigned a position with respect to a containing block.</p>
+</blockquote>
+<p>绝对定位的元素彻底脱离了正常流，完全不影响原来流的layout。</p>
+<p>绝对定位的元素创建了BFC，形成一个新的正常流。</p>
+<p>可通过<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-position" target="_blank" rel="external">position</a>属性来指定绝对定位。</p>
+<p><strong>NOTE</strong>: 绝对定位盒子的containing block是最近的祖先positioned box的padding edge（如果该祖先盒子为block-level）.</p>
+<h3 id="Example-2"><a href="#Example-2" class="headerlink" title="Example"></a>Example</h3><ul>
+<li><a href="https://jsbin.com/nakeha/edit?html,css,output" target="_blank" rel="external">绝对定位的top与left含义</a></li>
+</ul>
+<h3 id="Fixed-positioning"><a href="#Fixed-positioning" class="headerlink" title="Fixed positioning"></a>Fixed positioning</h3><blockquote>
+<p>Fixed positioning is a subcategory of absolute positioning.</p>
+</blockquote>
+<p>与绝对定位唯一的差别在于fixed positioning的元素，其containing block是由viewport创建的。即元素相对于视口定位。</p>
+<h2 id="Layered-presentation"><a href="#Layered-presentation" class="headerlink" title="Layered presentation"></a>Layered presentation</h2><p><img src="https://drafts.csswg.org/css-position/images/stack.png" alt="stack"></p>
+<p>CSS中每个盒子都有一个三维的位置信息，前面的定位机制都是指定了二维的信息（x-y平面）。</p>
+<p>如果元素的<code>position</code>属性值不为<code>static</code>，则称其为<code>positioned element</code>，其产生的盒子称为<code>positioned box</code>。</p>
+<p>使用相对定位或绝对定位可能出现盒子重叠的情况，此时可以使用<a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-z-index" target="_blank" rel="external">z-index</a>来指定stack level（哪个在上）。这便是第三维的位置信息。</p>
+<h3 id="Stacking-context"><a href="#Stacking-context" class="headerlink" title="Stacking context"></a>Stacking context</h3><p>根元素或<code>z-index</code>为<code>auto</code>的元素会创建一个stacking context。</p>
+<p>该元素的后代元素（如果它们不新建stacking context的话）都存在于该stacking context中，通过stacking level（即各自的<code>z-index</code>的值）来决定谁前谁后。</p>
+<p><strong>NOTE</strong>: z-index的比较只对同一个stacking context中的元素起作用。当两个元素处于不同的stacking context中时，必须找到它们处于同一个stacking context中的祖先，由其祖先的z-index决定谁前谁后。所以，这是一个拼爹的属性。</p>
+<h4 id="Example-3"><a href="#Example-3" class="headerlink" title="Example"></a>Example</h4><ul>
+<li><a href="https://jsbin.com/tibami/edit?html,css,output" target="_blank" rel="external">z-index的作用是要拼爹的</a></li>
+</ul>
+<h3 id="z-index"><a href="#z-index" class="headerlink" title="z-index"></a>z-index</h3><ul>
+<li><code>z-index</code>只对positioned element有效果</li>
+<li><code>z-index</code>用于指定stack-level</li>
+<li><code>z-index</code>用于创建stacking context</li>
+</ul>
+<p><img src="z-index.png" alt="z-index"></p>
+<h3 id="More-info"><a href="#More-info" class="headerlink" title="More info"></a>More info</h3><ul>
+<li><a href="https://drafts.csswg.org/css-position/#layered-presentation" target="_blank" rel="external">https://drafts.csswg.org/css-position/#layered-presentation</a></li>
+</ul>
+<h2 id="Sizing-and-positioning-details"><a href="#Sizing-and-positioning-details" class="headerlink" title="Sizing and positioning details"></a>Sizing and positioning details</h2><p>See <a href="https://drafts.csswg.org/css-position-3/#size-and-position-details" target="_blank" rel="external">here</a></p>
+<h2 id="Definitions"><a href="#Definitions" class="headerlink" title="Definitions"></a>Definitions</h2><h3 id="out-of-flow"><a href="#out-of-flow" class="headerlink" title="out of flow"></a>out of flow</h3><blockquote>
+<p>An element is called out of flow if it is floated, absolutely positioned, or is the root element.</p>
+</blockquote>
+<h3 id="in-flow"><a href="#in-flow" class="headerlink" title="in flow"></a>in flow</h3><blockquote>
+<p>An element is called in-flow if it is not out-of-flow.</p>
+</blockquote>
+<h3 id="flow"><a href="#flow" class="headerlink" title="flow"></a>flow</h3><blockquote>
+<p>The flow of an element A is the set consisting of A and all in-flow elements whose nearest out-of-flow ancestor is A.</p>
+</blockquote>
+<h3 id="positioned-element-box"><a href="#positioned-element-box" class="headerlink" title="positioned element/box"></a>positioned element/box</h3><blockquote>
+<p>An element is said to be positioned if its position property has a value other than static.</p>
+<p>Positioned elements generate positioned boxes</p>
+</blockquote>
+<h2 id="More"><a href="#More" class="headerlink" title="More"></a>More</h2><ul>
+<li><a href="http://www.w3.org/TR/CSS2/visuren.html" target="_blank" rel="external">http://www.w3.org/TR/CSS2/visuren.html</a></li>
+<li><a href="https://drafts.csswg.org/css-position/" target="_blank" rel="external">https://drafts.csswg.org/css-position/</a></li>
+<li><a href="https://drafts.csswg.org/css-display/" target="_blank" rel="external">https://drafts.csswg.org/css-display/</a></li>
+<li><a href="https://drafts.csswg.org/css-inline/" target="_blank" rel="external">https://drafts.csswg.org/css-inline/</a></li>
+<li><a href="https://drafts.csswg.org/css-flexbox/" target="_blank" rel="external">https://drafts.csswg.org/css-flexbox/</a></li>
+<li><a href="https://drafts.csswg.org/css-align/" target="_blank" rel="external">https://drafts.csswg.org/css-align/</a></li>
+<li><a href="https://drafts.csswg.org/css-overflow/" target="_blank" rel="external">https://drafts.csswg.org/css-overflow/</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;!-- toc --&gt;
+&lt;h2 id=&quot;Visual-Formatting-Model&quot;&gt;&lt;a href=&quot;#Visual-Formatting-Model&quot; class=&quot;headerlink&quot; title=&quot;Visual Formatting Model&quot;&gt;&lt;/a&gt;Visu
+    
+    </summary>
+    
+    
+      <category term="css" scheme="http://zoub.in/engineering/tags/css/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>一个随机数生成问题</title>
+    <link href="http://zoub.in/engineering/2015/04/10/random-numbers/"/>
+    <id>http://zoub.in/engineering/2015/04/10/random-numbers/</id>
+    <published>2015-04-10T01:55:54.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>假定有函数<code>random()</code>可得到0或1，其概率相同，均为1/2。如何得到一个可得到1..n整数的等概率随机数生产函数<code>randomN</code>？</p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>通过某种方式可得到一个数集，且其中每个数的出现概率是可计算的，这样，只需要确定这个方式，然后从数集中选择那些出现概率等于期望得到的数值即可。</p>
+<p>现在可直接产生一个0或1，其概率是相同的，那么可以产生n次，一共有2^n种结果，而其中有n种结果的出现概率是相同的，即n次中恰好有一次产生1而其它n-1次均产生0.</p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 给定等概率生产0, 1的函数</span></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">random</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">return</span> +(<span class="built_in">Math</span>.random() &lt; <span class="number">0.5</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">randomN</span><span class="params">(n)</span> </span>&#123;</div><div class="line">  <span class="keyword">var</span> m = <span class="number">0</span>; <span class="comment">// n次结果中1的个数</span></div><div class="line">  <span class="keyword">var</span> k = <span class="number">0</span>; <span class="comment">// n次结果中为1的最大序号</span></div><div class="line">  <span class="keyword">var</span> t;</div><div class="line">  <span class="keyword">var</span> i;</div><div class="line">  <span class="keyword">while</span> (m != <span class="number">1</span>) &#123;</div><div class="line">    m = <span class="number">0</span>;</div><div class="line">    k = <span class="number">0</span>;</div><div class="line">    <span class="keyword">for</span> (i = <span class="number">1</span>; i &lt;= n; i++) &#123;</div><div class="line">      t = random();</div><div class="line">      k = t == <span class="number">1</span> ? i : k;</div><div class="line">      m += t;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">return</span> k;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="复杂度分析"><a href="#复杂度分析" class="headerlink" title="复杂度分析"></a>复杂度分析</h3><p>一共有<code>2^n</code>种可能结果，其中有<code>n</code>种结果是我们所需要的，故外层循环终止的概率是<code>n/2^n</code>，期望循环次数为<code>2^n/n</code>，里面的操作次数为<code>n</code>，故一共需要执行<code>2^n</code>次<code>random</code>调用。</p>
+<h3 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h3><p>前面的可能结果太多，复杂度为<code>O(2^n)</code>。可以想办法缩减可能结果。</p>
+<p>当然，最少也得有<code>n</code>种可能。如何产生<code>n</code>各可能呢？</p>
+<p>考虑用二进制来表示整数。对于一个恰好有<code>m</code>位的数而言，只需要确定每一位是为1还是0即可确定该数。其可能结果集为<code>0..2^m-1</code>，其中任何一个数出现的概率均为<code>1/2^m</code>，这样，从中选取<code>n</code>个数即可满足需求。</p>
+<p>选取方式可作一个简单的映射，即<code>0..n-1</code>对应<code>1..n</code>。当随机<code>m</code>次得到整数<code>k</code>时，就选取<code>k+1</code>为最终的随机数。如果<code>k+1&gt;n</code>，可直接丢弃，重新生产。</p>
+<p>为使复杂度最少，可求得满足条件的最小<code>m</code>。</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// min&#123;m | 2^m &gt;= n&#125;</span></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">maxNumOfBits</span><span class="params">(n)</span> </span>&#123;</div><div class="line">  <span class="keyword">var</span> m = <span class="number">0</span>;</div><div class="line">  <span class="keyword">while</span> (m++, (n &gt;&gt;= <span class="number">1</span>));</div><div class="line">  <span class="keyword">return</span> m;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 1..n</span></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">randomN</span><span class="params">(n)</span> </span>&#123;</div><div class="line">  <span class="keyword">var</span> m = maxNumOfBits(n);</div><div class="line">  <span class="keyword">var</span> ret = n;</div><div class="line">  <span class="keyword">while</span> (ret &gt;= n) &#123;</div><div class="line">    ret = <span class="number">0</span>;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>, t = <span class="number">1</span>; i &lt; m; i++, t &lt;&lt;= <span class="number">1</span>) &#123;</div><div class="line">      <span class="keyword">if</span> (random()) &#123;</div><div class="line">        ret |= t;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">return</span> ret + <span class="number">1</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上述算法中<code>m=ceiling(lgn)</code>。每次产生出满足条件(<code>ret &lt; n</code>)的随机数的概率是<code>n/2^m</code>，故<code>while</code>循环的期望执行次数为<code>2^m/n</code>，且<code>1 &lt;= 2^m/n &lt; 2</code>，故算法的平均复杂度为<code>O(lgn)</code>。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// TEST</span></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params">r, n, index</span>) </span>&#123;</div><div class="line">  <span class="keyword">var</span> ret = &#123;&#125;;</div><div class="line"></div><div class="line">  <span class="keyword">var</span> expectedIndex = index || <span class="number">2</span>;</div><div class="line"></div><div class="line">  <span class="comment">// 实验次数</span></div><div class="line">  <span class="keyword">var</span> totalTimes = +(n + <span class="string">'e'</span> + expectedIndex);</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'Generate random numbers '</span> + totalTimes + <span class="string">' times in total'</span>);</div><div class="line"></div><div class="line">  <span class="comment">// 期望每个数出现的次数</span></div><div class="line">  <span class="keyword">var</span> expectedAppearances = +(<span class="string">'1e'</span> + expectedIndex);</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'Expect each number to appear '</span> + expectedAppearances + <span class="string">' times'</span>);</div><div class="line"></div><div class="line">  <span class="keyword">var</span> confidence_90_low = +(<span class="string">'0.9e'</span> + expectedIndex);</div><div class="line">  <span class="keyword">var</span> confidence_90_high = +(<span class="string">'1.1e'</span> + expectedIndex);</div><div class="line">  <span class="keyword">var</span> confidence_95_low = +(<span class="string">'0.95e'</span> + expectedIndex);</div><div class="line">  <span class="keyword">var</span> confidence_95_high = +(<span class="string">'1.05e'</span> + expectedIndex);</div><div class="line"></div><div class="line">  <span class="keyword">var</span> m;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; totalTimes; i++) &#123;</div><div class="line">    m = r(n);</div><div class="line">    ret[m] = (ret[m] || <span class="number">0</span>) + <span class="number">1</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'All results:'</span>, ret);</div><div class="line">  <span class="keyword">var</span> numbers = <span class="built_in">Object</span>.keys(ret);</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'Number of numbers:'</span>, numbers.length);</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'Maximum:'</span>, <span class="built_in">Math</span>.max.apply(<span class="built_in">Math</span>, numbers));</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'Minimum:'</span>, <span class="built_in">Math</span>.min.apply(<span class="built_in">Math</span>, numbers));</div><div class="line"></div><div class="line">  <span class="keyword">var</span> casesAbove95 = <span class="number">0</span>;</div><div class="line">  <span class="keyword">var</span> casesAbove90 = <span class="number">0</span>;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>, len = numbers.length; i &lt; len; i++) &#123;</div><div class="line">    <span class="keyword">var</span> rn = ret[numbers[i]];</div><div class="line">    <span class="keyword">if</span> (rn &gt;= confidence_90_low &amp;&amp; rn &lt;= confidence_90_high)</div><div class="line">      casesAbove90++;</div><div class="line">    <span class="keyword">if</span> (rn &gt;= confidence_95_low &amp;&amp; rn &lt;= confidence_95_high)</div><div class="line">      casesAbove95++;</div><div class="line">  &#125;</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'About '</span> + +(casesAbove90 / n + (<span class="string">'e2'</span>)) + <span class="string">' percent of numbers have 90 percent confidence:'</span>, confidence_90_low, confidence_90_high);</div><div class="line">  <span class="built_in">console</span>.log(<span class="string">'About '</span> + +(casesAbove95 / n + (<span class="string">'e2'</span>)) + <span class="string">' percent of numbers have 95 percent confidence:'</span>, confidence_95_low, confidence_95_high);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="另一个问题"><a href="#另一个问题" class="headerlink" title="另一个问题"></a>另一个问题</h2><p>如果<code>random()</code>产生0或1的概率不等，且未知，如何获得一个产生等概率0或1的<code>random()</code>？</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;问题描述&quot;&gt;&lt;a href=&quot;#问题描述&quot; class=&quot;headerlink&quot; title=&quot;问题描述&quot;&gt;&lt;/a&gt;问题描述&lt;/h2&gt;&lt;p&gt;假定有函数&lt;code&gt;random()&lt;/code&gt;可得到0或1，其概率相同，均为1/2。如何得到一个可得到1..n整数的等
+    
+    </summary>
+    
+    
+      <category term="algorithm" scheme="http://zoub.in/engineering/tags/algorithm/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>command mode in vim</title>
+    <link href="http://zoub.in/engineering/2014/11/05/command-mode-in-vim/"/>
+    <id>http://zoub.in/engineering/2014/11/05/command-mode-in-vim/</id>
+    <published>2014-11-05T11:09:19.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="ex-Commands"><a href="#ex-Commands" class="headerlink" title="ex Commands"></a>ex Commands</h2><table>
+<thead>
+<tr>
+<th>command</th>
+<th>meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d</td>
+<td>Delete lines</td>
+</tr>
+<tr>
+<td>m</td>
+<td>Move lines</td>
+</tr>
+<tr>
+<td>co</td>
+<td>Copy lines</td>
+</tr>
+<tr>
+<td>t</td>
+<td>Copy lines (a synonym forco)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="指定操作的行范围"><a href="#指定操作的行范围" class="headerlink" title="指定操作的行范围"></a>指定操作的行范围</h3><table>
+<thead>
+<tr>
+<th>命令形式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>直接使用数字</td>
+</tr>
+<tr>
+<td>:3,18d</td>
+<td>删除3到18行</td>
+</tr>
+<tr>
+<td>:3,18m100</td>
+<td>将3到18行移动到第100行后，相当于d再p</td>
+</tr>
+<tr>
+<td>:3,18t100</td>
+<td>将3到18行复制到第100行后，相当于y再p</td>
+</tr>
+<tr>
+<td></td>
+<td>使用相对当前行号的符号</td>
+</tr>
+<tr>
+<td>:.,$d</td>
+<td>删除当前行到最后一行</td>
+</tr>
+<tr>
+<td>:%d</td>
+<td>删除所有行</td>
+</tr>
+<tr>
+<td>:3,.m100</td>
+<td>将3到当前行移动到第100行后</td>
+</tr>
+<tr>
+<td>:%t$</td>
+<td>复制所有行，添加到末尾</td>
+</tr>
+<tr>
+<td>:.,+20d</td>
+<td>删除当前行及接下来的20行</td>
+</tr>
+<tr>
+<td>:20,$m.-2</td>
+<td>将20行以后的内容移动到当前行往上的两行位置</td>
+</tr>
+<tr>
+<td>:-,+t0</td>
+<td>复制当前行上下共三行到文件顶部（1表示第1行）</td>
+</tr>
+<tr>
+<td></td>
+<td>使用搜索：<code>/pattern/</code>可表示行号。</td>
+</tr>
+<tr>
+<td>:/pattern/d</td>
+<td>删除下一处pattern所在的行</td>
+</tr>
+<tr>
+<td>:/pattern/+d</td>
+<td>删除下一处pattern所在行的下一行</td>
+</tr>
+<tr>
+<td>:/pattern1/,/pattern2/d</td>
+<td>删除下一处pattern1所在行到下一处pattern2所在行</td>
+</tr>
+<tr>
+<td>:.,/pattern/m23</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>d/pattern</code></td>
+<td>删除从当前位置到pattern所在位置前的所有字符。</td>
+</tr>
+<tr>
+<td><code>:.,/pattern/d</code></td>
+<td>删除从当前行到pattern所在行。注意与<code>d/pattern</code>的区别</td>
+</tr>
+<tr>
+<td></td>
+<td>使用分号修改相对行号的含义</td>
+</tr>
+<tr>
+<td><code>100,+6d</code></td>
+<td>删除100行到当前行以下的第6行。</td>
+</tr>
+<tr>
+<td><code>100;+6d</code></td>
+<td>删除100行到106行。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h3><p><code>:g</code>可以进行全局搜索。</p>
+<table>
+<thead>
+<tr>
+<th>命令形式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>:g/pattern</td>
+<td>查找（并移动）到最后一处pattern</td>
+</tr>
+<tr>
+<td>:g/pattern/p</td>
+<td>查找并展示所有pattern所在的行</td>
+</tr>
+<tr>
+<td>:g!/pattern/nu</td>
+<td>查找并展示所有pattern不在的行，并展示行号</td>
+</tr>
+<tr>
+<td>:60,120g/pattern/p</td>
+<td>在60到120行中查找并展示所有pattern在的行</td>
+</tr>
+</tbody>
+</table>
+<p><code>:g</code>可以和<code>:s</code>，<code>:d</code>，<code>:mo</code>，<code>:co</code>组合使用。</p>
+<table>
+<thead>
+<tr>
+<th>命令形式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:g/pattern/s/old/new/g</code></td>
+<td>在所有含有pattern的行上执行<code>s/old/new/g</code></td>
+</tr>
+<tr>
+<td><code>:g/pattern/s//new/g</code></td>
+<td>即<code>:g/pattern/s/pattern/new/g</code>或<code>%s/pattern/new/g</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h3><h4 id="多条命令组合"><a href="#多条命令组合" class="headerlink" title="多条命令组合"></a>多条命令组合</h4><p>可以用<code>|</code>来在同一行执行多条命令，相当于shell中的<code>;</code>。</p>
+<h4 id="添加到文件末尾"><a href="#添加到文件末尾" class="headerlink" title="添加到文件末尾"></a>添加到文件末尾</h4><figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">:</span><span class="number">300</span>,$w<span class="meta">&gt;&gt;</span>filename</div></pre></td></tr></table></figure>
+<h4 id="读取文件内容"><a href="#读取文件内容" class="headerlink" title="读取文件内容"></a>读取文件内容</h4><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">:r</span> file</div><div class="line"><span class="symbol">:</span><span class="number">30</span>r file</div><div class="line"><span class="symbol">:</span><span class="variable">$r</span> file</div><div class="line"><span class="symbol">:</span>0r file</div><div class="line"><span class="symbol">:/pattern/r</span> file</div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;ex-Commands&quot;&gt;&lt;a href=&quot;#ex-Commands&quot; class=&quot;headerlink&quot; title=&quot;ex Commands&quot;&gt;&lt;/a&gt;ex Commands&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;command&lt;/th&gt;
+    
+    </summary>
+    
+    
+      <category term="vim" scheme="http://zoub.in/engineering/tags/vim/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>motion in vim</title>
+    <link href="http://zoub.in/engineering/2014/11/03/motion-in-vim/"/>
+    <id>http://zoub.in/engineering/2014/11/03/motion-in-vim/</id>
+    <published>2014-11-03T10:11:45.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="motion-command-cheat-sheet"><a href="#motion-command-cheat-sheet" class="headerlink" title="motion command cheat sheet"></a>motion command cheat sheet</h2><h3 id="单词级别的移动"><a href="#单词级别的移动" class="headerlink" title="单词级别的移动"></a>单词级别的移动</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>特点</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>w</td>
+<td>exclusive</td>
+<td>移至右边第一个“单词首字母位置”</td>
+<td><mark>H</mark>ello World! &raquo;<code>w</code> &raquo; Hello <mark>W</mark>orld!</td>
+</tr>
+<tr>
+<td>W</td>
+<td>exclusive</td>
+<td>移至右边第一个“非空白串首字母位置”</td>
+<td><mark>(</mark>a, b) <code>W</code> (a, <mark>b</mark>)<br>(<mark>$</mark>par, $ext) <code>dW</code> (<mark>$</mark>ext)</td>
+</tr>
+<tr>
+<td>b</td>
+<td>exclusive</td>
+<td>w的反方向</td>
+<td>-</td>
+</tr>
+<tr>
+<td>B</td>
+<td>exclusive</td>
+<td>W的反方向</td>
+<td>-</td>
+</tr>
+<tr>
+<td>e</td>
+<td>inclusive</td>
+<td>移至右边第一个“单词末字母位置”</td>
+<td><mark>H</mark>ello World! &raquo;<code>e</code> &raquo; Hell<mark>o</mark> World!<br>Hell<mark>o</mark> World! &raquo;<code>e</code> &raquo; Hello Worl<mark>d</mark>!</td>
+</tr>
+<tr>
+<td>E</td>
+<td>inclusive</td>
+<td>移至右边第一个“非空白串末字母位置”</td>
+<td><mark>(</mark>$a, $b, $c) &raquo;<code>E</code> &raquo; ($a<mark>,</mark> $b, $c) &raquo;<code>E</code> &raquo; ($a, $b<mark>,</mark> $c) &raquo; ($a, $b, $c<mark>)</mark></td>
+</tr>
+<tr>
+<td>ge</td>
+<td>inclusive</td>
+<td>e的反方向</td>
+<td>往左+inclusive，T和F是往左+exclusive</td>
+</tr>
+<tr>
+<td>gE</td>
+<td>inclusive</td>
+<td>E的反方向</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="行内任意跨度"><a href="#行内任意跨度" class="headerlink" title="行内任意跨度"></a>行内任意跨度</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>特点</th>
+<th>含义</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fx</td>
+<td>inclusive</td>
+<td>向右移至字符x的位置</td>
+<td>Hell<mark>o</mark> World! &raquo;<code>fo</code> &raquo; Hello W<mark>o</mark>rld!<br>Hell<mark>o</mark> World! &raquo;<code>dfo</code>&raquo; Hell<mark>r</mark>ld!</td>
+</tr>
+<tr>
+<td>Fx</td>
+<td>exclusive</td>
+<td>向左移至字符x的位置</td>
+<td>Hello W<mark>o</mark>rld! &raquo;<code>Fo</code> &raquo; Hell<mark>o</mark> World!<br>Hello W<mark>o</mark>rld! &raquo;<code>dFo</code>&raquo; Hell<mark>o</mark>rld!<br>注意对比exclusive与inclusive的效果</td>
+</tr>
+<tr>
+<td>tx</td>
+<td>inclusive</td>
+<td>向右移至字符x的左一个位置</td>
+<td>Hell<mark>o</mark> World! &raquo;<code>to</code> &raquo; Hello <mark>W</mark>orld!<br>Hell<mark>o</mark> World! &raquo;<code>dto</code>&raquo; Hell<mark>o</mark>rld!</td>
+</tr>
+<tr>
+<td>Tx</td>
+<td>exclusive</td>
+<td>向左移至字符x的右一个位置</td>
+<td>Hello W<mark>o</mark>rld! &raquo;<code>To</code> &raquo; Hello<mark> </mark>World!<br>Hello W<mark>o</mark>rld! &raquo;<code>dTo</code>&raquo; Hello<mark>o</mark>rld!<br>注意对比exclusive与inclusive的效果</td>
+</tr>
+<tr>
+<td>;</td>
+<td>与被重复的移动一样</td>
+<td>重复前一次的f, F, t, T</td>
+<td><mark>H</mark>ello World! &raquo;<code>fo</code> &raquo; Hell<mark>o</mark> World! &raquo; <code>;</code> &raquo; Hello W<mark>o</mark>rld!</td>
+</tr>
+<tr>
+<td>,</td>
+<td>与被重复的移动一样</td>
+<td>反方向重复前一次的f, F, t, T</td>
+<td>Hell<mark>o</mark> World! &raquo;<code>fo</code> &raquo; Hello W<mark>o</mark>rld! &raquo; <code>,</code> &raquo; Hell<mark>o</mark> World!</td>
+</tr>
+</tbody>
+</table>
+<h3 id="行间"><a href="#行间" class="headerlink" title="行间"></a>行间</h3><p>跨行的默认都是inclusive，但可以加v来修改。</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-</td>
+<td>移至上一行首个非空字符位置</td>
+</tr>
+<tr>
+<td>+</td>
+<td>移至下一行首个非空字符位置</td>
+</tr>
+<tr>
+<td>2g_</td>
+<td>移至下一行最后一个非空字符位置</td>
+</tr>
+<tr>
+<td>gg</td>
+<td>移至第一行</td>
+</tr>
+<tr>
+<td>G</td>
+<td>移至最后一行</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Mark"><a href="#Mark" class="headerlink" title="Mark"></a>Mark</h3><p>可在任意光标处打标记，并进行命名，再通过命令直接移至该位置。时间顺序上，这些标记形成</p>
+<p>设置标记的命令：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>m{a-zA-Z}</td>
+<td>命名为指定字母</td>
+</tr>
+<tr>
+<td>m’<br>m`</td>
+<td>这两个标记表示mark list中的前一个位置</td>
+</tr>
+</tbody>
+</table>
+<p>移动至标记的命令：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>特点</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>`</td>
+<td>exclusive</td>
+<td>移至指定标记对应的光标位置</td>
+</tr>
+<tr>
+<td>‘</td>
+<td>inclusive<br>linewise</td>
+<td>移至指定标记对应的光标位置所在行的行首（第一个非空字符）</td>
+</tr>
+</tbody>
+</table>
+<p>除字母和数字外，下面还有几组实用的标记：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[</td>
+<td>前一次修改或复制文本首字符位置</td>
+<td>]</td>
+<td>前一次修改或复制文本末字符位置</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>前一次选择的visual块文本首字符位置</td>
+<td>&gt;</td>
+<td>前一次选择的visual块文本末字符位置</td>
+</tr>
+<tr>
+<td>‘, `</td>
+<td>前一次jump位置或m’m`设置的位置</td>
+<td>“</td>
+<td>前一次离开buffer的位置</td>
+</tr>
+<tr>
+<td>^</td>
+<td>前一次insert的位置</td>
+<td>.</td>
+<td>前一次修改的位置</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Jump"><a href="#Jump" class="headerlink" title="Jump"></a>Jump</h3><p>当使用以下命令时，执行前光标所在位置会被记录：</p>
+<figure class="highlight excel"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">', `, G, /, ?, <span class="built_in">n</span>, <span class="built_in">N</span>, %, (, ), [[, ]], &#123;, &#125;, <span class="symbol">:s</span>, <span class="symbol">:ta</span>g, L, M, H</div></pre></td></tr></table></figure>
+<p>这些被记录的位置（jump list）可以通过以下这组命令快速移动：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CTRL-o</td>
+<td>移至更旧的记录位置</td>
+</tr>
+<tr>
+<td>CTRL-I<br>Tab</td>
+<td>移至更新的记录位置</td>
+</tr>
+</tbody>
+</table>
+<p>可以通过:ju[mps]来查看当前窗口的jump list。</p>
+<p>类似jump list，当修改文本时，光标位置也会被记录，形成一个change list。通过以下这组命令移动：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>g;</td>
+<td>移至更旧的修改位置</td>
+</tr>
+<tr>
+<td>g,</td>
+<td>移至更新的修改位置</td>
+</tr>
+</tbody>
+</table>
+<p>:changes可查看当前文件的所有修改位置</p>
+<h3 id="Various"><a href="#Various" class="headerlink" title="Various"></a>Various</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>%</td>
+<td>在括号（或其它，见后面）的匹配位置间跳转</td>
+</tr>
+<tr>
+<td>[{</td>
+<td>移至前面（可不在同一行）第一个未被匹配的{</td>
+</tr>
+<tr>
+<td>[(</td>
+<td>移至前面（可不在同一行）第一个未被匹配的(</td>
+</tr>
+<tr>
+<td>])</td>
+<td>移至后面（可不在同一行）第一个未被匹配的)</td>
+</tr>
+<tr>
+<td>]}</td>
+<td>移至后面（可不在同一行）第一个未被匹配的}</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>关于%，可匹配的除了([{}])外，还有/<em> </em>/，以及#if, #ifdef, #else, #elif, #endif。如果装上matchit，可以在html开始结束标签间跳转</li>
+<li>关于有转义或是括号出现在字符串中的情况，可在:h %中找到更多信息</li>
+</ul>
+<p>以下这组命令适合较大范围的移动</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H</td>
+<td>窗口顶部</td>
+</tr>
+<tr>
+<td>M</td>
+<td>窗口中间</td>
+</tr>
+<tr>
+<td>L</td>
+<td>窗口底部</td>
+</tr>
+</tbody>
+</table>
+<p>注意：效果受scrolloff选项的影响。</p>
+<p>下面这组命令适合于在类似Java或PHP等中class定义文件中移动：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>]m</td>
+<td>下一个方法的开始位置{</td>
+<td>]M</td>
+<td>下一个方法的结束位置}</td>
+</tr>
+<tr>
+<td>[m</td>
+<td>上一个方法的开始位置{</td>
+<td>[M</td>
+<td>上一个方法的结束位置}</td>
+</tr>
+</tbody>
+</table>
+<h4 id="示例"><a href="#示例" class="headerlink" title="%示例"></a>%示例</h4><p><code>%</code>之前：</p>
+<pre>
+<mark>Y</mark>.mix(Y_Node.prototype, {
+    purge: function (recurse, type) {
+        Y.Event.purgeElement(this._node, recurse, type);
+        return this;
+    }
+});
+</pre>
+
+<p><code>%</code>之后：</p>
+<pre>
+Y.mix(Y_Node.prototype, {
+    purge: function (recurse, type) {
+        Y.Event.purgeElement(this._node, recurse, type);
+        return this;
+    }
+}<mark>)</mark>;
+</pre>
+
+<h4 id="示例-1"><a href="#示例-1" class="headerlink" title="[{示例"></a>[{示例</h4><p><code>[{</code>之前：</p>
+<pre>
+Y.mix(Y_Node.prototype, {
+    purge: function (<mark>r</mark>ecurse, type) {
+        Y.Event.purgeElement(this._node, recurse, type);
+        return this;
+    }
+});
+</pre>
+
+<p><code>[{</code>之后：</p>
+<pre>
+Y.mix(Y_Node.prototype, <mark>{</mark>
+    purge: function (recurse, type) {
+        Y.Event.purgeElement(this._node, recurse, type);
+        return this;
+    }
+});
+</pre>
+
+<h2 id="浏览"><a href="#浏览" class="headerlink" title="浏览"></a>浏览</h2><p>以下几组命令适合于浏览文件，不一定会移动光标：</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>zt</td>
+<td>当前行置于窗口顶部</td>
+</tr>
+<tr>
+<td>zb</td>
+<td>当前行置于窗口底部</td>
+</tr>
+<tr>
+<td>zz</td>
+<td>当前行置于窗口中间</td>
+</tr>
+<tr>
+<td>CTRL-F</td>
+<td>往下一屏</td>
+</tr>
+<tr>
+<td>CTRL-B</td>
+<td>往上一屏</td>
+</tr>
+<tr>
+<td>CTRL-D</td>
+<td>往下半屏</td>
+</tr>
+<tr>
+<td>CTRL-U</td>
+<td>往上半屏</td>
+</tr>
+</tbody>
+</table>
+<p>注意：效果受scrolloff选项的影响。</p>
+<h2 id="移动命令的两组特性"><a href="#移动命令的两组特性" class="headerlink" title="移动命令的两组特性"></a>移动命令的两组特性</h2><h3 id="linewise-and-characterwise"><a href="#linewise-and-characterwise" class="headerlink" title="linewise and characterwise"></a>linewise and characterwise</h3><p>移动命令可能影响整行，或是起始与结束位置间的文本。</p>
+<p>如果移动是跨行的（如k,j），则影响整行（或linewise）。这样操作的便是整行，所以dj删除的是两行。</p>
+<p>如果移动是行内的（如h,l），则影响起始与结束间的文本（characterwise）。这样操作的是一段文本（可能跨行），所以dl删除的是当前光标下的字符。</p>
+<h3 id="exclusive-and-inclusive"><a href="#exclusive-and-inclusive" class="headerlink" title="exclusive and inclusive"></a>exclusive and inclusive</h3><p>对于跨行移动，起始与结束位置所在行总是受影响的。但对于行内移动而言，其起始与结束处的位置是否受影响，取决于该移动命令是exclusive还是inclusive。</p>
+<p>每个移动命令，都会指明其影响是exclusive还是inclusive。<br>对于inclusive命令而言，影响起始与结束位置的字符。对于exclusive命令而言，文本范围中的最后一个字符将被排除在外。  </p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="string">" 假设光标停留在"</span>abcdef<span class="string">"中的c字符上</span></div><div class="line">yfe <span class="string">" 复制cde，因为f是inclusive命令</span></div><div class="line">yFa <span class="string">" 复制ab，因为F是exclusive命令，所以文本范围中的最后一个字符c被排除在外</span></div></pre></td></tr></table></figure>
+<p>跨行移动，总是inclusive的。</p>
+<h3 id="转换的情况"><a href="#转换的情况" class="headerlink" title="转换的情况"></a>转换的情况</h3><p>linewise和characterwise的操作是可以强制转换的。方法便是在operator后面加v, V或CTRL-V。  </p>
+<ul>
+<li>v置于operator和motion之间，则操作将成为characterwise。<ul>
+<li>如果移动命令是linewise，则转换后操作是exclusive的。譬如dj本来删除的是两行，而dvj则删除的是当前光标到下行同样位置间的字符，不包括最后一个字符。</li>
+<li>如果移动命令是characterwise，则会切换其exclusive/inclusive特性。譬如dl本来删除的是当前光标下的字符，但dvl则删除的是当前光标和下一个位置的两个字符，因为l本是characterwise且exclusive，加上v后便成了inclusive了。</li>
+</ul>
+</li>
+<li>V置于operator和motion之间，则操作将成为linewise。</li>
+<li>CTRL-V可实现块操作</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;motion-command-cheat-sheet&quot;&gt;&lt;a href=&quot;#motion-command-cheat-sheet&quot; class=&quot;headerlink&quot; title=&quot;motion command cheat sheet&quot;&gt;&lt;/a&gt;motion c
+    
+    </summary>
+    
+    
+      <category term="vim" scheme="http://zoub.in/engineering/tags/vim/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cheat sheet - vim</title>
+    <link href="http://zoub.in/engineering/2014/11/03/cheat-sheet-vim/"/>
+    <id>http://zoub.in/engineering/2014/11/03/cheat-sheet-vim/</id>
+    <published>2014-11-03T01:17:22.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="修改文本"><a href="#修改文本" class="headerlink" title="修改文本"></a>修改文本</h2><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在插入模式下将光标前一个单词所有字母大写</td>
+<td><code>&lt;Esc&gt;gUiw`]a</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="有序列表"><a href="#有序列表" class="headerlink" title="有序列表"></a>有序列表</h3><p>The CTRL-A command is very useful in a macro.  Example: Use the following<br>steps to make a numbered list.</p>
+<ol>
+<li>Create the first list entry, make sure it starts with a number.</li>
+<li>qa         - start recording into register ‘a’</li>
+<li>Y         - yank the entry</li>
+<li>p         - put a copy of the entry below the first one</li>
+<li>CTRL-A    - increment the number</li>
+<li>q         - stop recording</li>
+<li><count>@a - repeat the yank, put and increment <count> times</count></count></li>
+</ol>
+<h2 id="Text-object-selection"><a href="#Text-object-selection" class="headerlink" title="Text object selection"></a>Text object selection</h2><p>仅能在Visual模式下使用，或是紧跟在操作命令后。</p>
+<p>模式：<code>[ai]x</code>。</p>
+<p>其中[ai]表示可以是“a”或者“i”。x为范围类型，可以是以下字符：</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">w, W, [, ], (, ), &#123;, &#125;, &lt;, t, <span class="string">", ', `</span></div></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>包含边界</td>
+</tr>
+<tr>
+<td>i</td>
+<td>不包含边界</td>
+</tr>
+</tbody>
+</table>
+<p>示例</p>
+<table>
+<thead>
+<tr>
+<th>操作前</th>
+<th>操作</th>
+<th>操作后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>“Hello Wo<mark>r</mark>ld!”</td>
+<td><code>vaw</code></td>
+<td><mark>“Hello World!”</mark></td>
+</tr>
+<tr>
+<td>(Hello Wo<mark>r</mark>ld!)</td>
+<td><code>vi)</code></td>
+<td>(<mark>Hello World!)</mark></td>
+</tr>
+<tr>
+<td>(Hello Wo<mark>r</mark>ld!)</td>
+<td><code>di)</code></td>
+<td>()</td>
+</tr>
+</tbody>
+</table>
+<h2 id="移动"><a href="#移动" class="headerlink" title="移动"></a>移动</h2><h3 id="单词跨度"><a href="#单词跨度" class="headerlink" title="单词跨度"></a>单词跨度</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>w</td>
+<td>移至右边第一个“单词首字母位置”</td>
+<td>W</td>
+<td>移至右边第一个“非空白串首字符位置”</td>
+</tr>
+<tr>
+<td>b</td>
+<td>w的反方向</td>
+<td>B</td>
+<td>W的反方向</td>
+</tr>
+<tr>
+<td>e</td>
+<td>移至右边第一个“单词末字母位置”</td>
+<td>E</td>
+<td>移至右边第一个“非空白串末字符位置”</td>
+</tr>
+<tr>
+<td>ge</td>
+<td>e的反方向</td>
+<td>gE</td>
+<td>E的反方向</td>
+</tr>
+</tbody>
+</table>
+<h3 id="行内任意跨度"><a href="#行内任意跨度" class="headerlink" title="行内任意跨度"></a>行内任意跨度</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fx</td>
+<td>向右移至字符x的位置</td>
+<td>Fx</td>
+<td>向左移至字符x的位置</td>
+</tr>
+<tr>
+<td>tx</td>
+<td>向右移至字符x的左侧字符位置</td>
+<td>Tx</td>
+<td>向左移至字符x的右侧字符位置</td>
+</tr>
+<tr>
+<td>;</td>
+<td>重复前一次的f, F, t, T</td>
+<td>,</td>
+<td>反方向重复前一次的f, F, t, T</td>
+</tr>
+<tr>
+<td>ge</td>
+<td>e的反方向</td>
+<td>gE</td>
+<td>E的反方向</td>
+</tr>
+</tbody>
+</table>
+<h3 id="整行跨度"><a href="#整行跨度" class="headerlink" title="整行跨度"></a>整行跨度</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-</td>
+<td>移至上一行首个非空字符位置</td>
+<td>+</td>
+<td>移至下一行首个非空字符位置</td>
+</tr>
+<tr>
+<td>gg</td>
+<td>移至第一行</td>
+<td>G</td>
+<td>移至最后一行</td>
+</tr>
+<tr>
+<td>2g_</td>
+<td>移至下一行最后一个非空字符位置</td>
+<td>H</td>
+<td>窗口顶部</td>
+</tr>
+<tr>
+<td>M</td>
+<td>窗口中间</td>
+<td>L</td>
+<td>窗口底部</td>
+</tr>
+</tbody>
+</table>
+<h3 id="JUMP"><a href="#JUMP" class="headerlink" title="JUMP"></a>JUMP</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CTRL-O</td>
+<td>移至更旧的记录位置</td>
+<td>CTRL-I<br>Tab</td>
+<td>移至更新的记录位置</td>
+</tr>
+<tr>
+<td>g;</td>
+<td>移至更旧的修改位置</td>
+<td>g,</td>
+<td>移至更新的修改位置</td>
+</tr>
+</tbody>
+</table>
+<p>注：如果对tab做了重映射，会导致CTRL-I失效。</p>
+<h3 id="配对括号间跳转"><a href="#配对括号间跳转" class="headerlink" title="配对括号间跳转"></a>配对括号间跳转</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>%</td>
+<td>移至当前位置下的或同行右侧第一个括号的匹配位置</td>
+</tr>
+<tr>
+<td>[{</td>
+<td>移至前面（可不在同一行）第一个未被匹配的{</td>
+</tr>
+<tr>
+<td>[(</td>
+<td>移至前面（可不在同一行）第一个未被匹配的(</td>
+</tr>
+<tr>
+<td>])</td>
+<td>移至后面（可不在同一行）第一个未被匹配的)</td>
+</tr>
+<tr>
+<td>]}</td>
+<td>移至后面（可不在同一行）第一个未被匹配的}</td>
+</tr>
+</tbody>
+</table>
+<p>关于%，可匹配的除了([{}])外，还有/* */，以及#if, #ifdef, #else, #elif, #endif。如果装上matchit，可以在html开始结束标签间跳转。</p>
+<h2 id="浏览"><a href="#浏览" class="headerlink" title="浏览"></a>浏览</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>zt</td>
+<td>当前行置于窗口顶部</td>
+</tr>
+<tr>
+<td>zb</td>
+<td>当前行置于窗口底部</td>
+</tr>
+<tr>
+<td>zz</td>
+<td>当前行置于窗口中间</td>
+</tr>
+<tr>
+<td>CTRL-F</td>
+<td>往下一屏</td>
+</tr>
+<tr>
+<td>CTRL-B</td>
+<td>往上一屏</td>
+</tr>
+<tr>
+<td>CTRL-D</td>
+<td>往下半屏</td>
+</tr>
+<tr>
+<td>CTRL-U</td>
+<td>往上半屏</td>
+</tr>
+</tbody>
+</table>
+<h2 id="visual模式"><a href="#visual模式" class="headerlink" title="visual模式"></a>visual模式</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v</td>
+<td>characterwise visual mode</td>
+</tr>
+<tr>
+<td>V</td>
+<td>linewise visual mode</td>
+</tr>
+<tr>
+<td>CTRL-V</td>
+<td>blockwise visual mode</td>
+</tr>
+</tbody>
+</table>
+<h3 id="模式转换"><a href="#模式转换" class="headerlink" title="模式转换"></a>模式转换</h3><table>
+<thead>
+<tr>
+<th>old mode</th>
+<th>new node after command</th>
+<th>-</th>
+<th>-</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-</td>
+<td>v</td>
+<td>CTRL-V</td>
+<td>V</td>
+</tr>
+<tr>
+<td>Normal</td>
+<td>Visual</td>
+<td>blockwise Visual</td>
+<td>linewise Visual</td>
+</tr>
+<tr>
+<td>Visual</td>
+<td>Normal</td>
+<td>blockwise Visual</td>
+<td>linewise Visual</td>
+</tr>
+<tr>
+<td>blockwise Visual</td>
+<td>Visual</td>
+<td>Normal</td>
+<td>linewise Visual</td>
+</tr>
+<tr>
+<td>linewise Visual</td>
+<td>Visual</td>
+<td>blockwise Visual</td>
+<td>Normal</td>
+</tr>
+</tbody>
+</table>
+<p>简要概之：三条命令都会将模式切换到各自关联的模式（譬如v对应Visual，V对应linewise Visual），但如果旧模式就是所关联的模式，则会取消，回到Normal。</p>
+<h3 id="gv"><a href="#gv" class="headerlink" title="gv"></a>gv</h3><blockquote>
+<p>Start Visual mode with the same area as the previous area and the same mode.<br>In Visual mode the current and the previous Visual area are exchanged.<br>After using “p” or “P” in Visual mode the text that was put will be selected.</p>
+</blockquote>
+<h4 id="打开文件时正定位到上次离开时光标的位置"><a href="#打开文件时正定位到上次离开时光标的位置" class="headerlink" title="打开文件时正定位到上次离开时光标的位置"></a>打开文件时正定位到上次离开时光标的位置</h4><p>在.vimrc中添加以下代码即可：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">au</span> BufReadPost * <span class="keyword">if</span> <span class="built_in">line</span>(<span class="string">"'\""</span>) &gt; <span class="number">1</span> &amp;&amp; <span class="built_in">line</span>(<span class="string">"'\""</span>) &lt;= <span class="built_in">line</span>(<span class="string">"$"</span>) | <span class="keyword">exe</span> <span class="string">"normal! g'\""</span> | <span class="keyword">endif</span></div></pre></td></tr></table></figure>
+<p>其中<code>line(&quot;&#39;\&quot;&quot;)</code>，就是获取”标记所在的行号。<code>g&#39;\&quot;</code>就是移至”标记的位置。</p>
+<h4 id="gv选择上一次的选择区"><a href="#gv选择上一次的选择区" class="headerlink" title="gv选择上一次的选择区"></a>gv选择上一次的选择区</h4><p>如果需要对一段代码修改缩进，通常的做法是V之后选中这段代码，再用&lt;或&gt;左右调整。但输入一次&lt;或&gt;后选中状态便消失了，如果需要往左两次的话，需要再V然后选中，再输一次&lt;。这个过程其实可以很简单。</p>
+<p>下面将当前行减少两次缩进为例来说明如何做到快速连续修改缩进。<br>gv命令可以启动可视模式，并重新选择上一次的选择区。因此，实现上述目标执行如下序列即可：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">V&lt;<span class="keyword">gv</span>&lt;</div></pre></td></tr></table></figure>
+<p>如果要左移三次的话，得输两次gv，还是比较麻烦的。可以通过重新映射&lt;与&gt;来改进。在.vimrc中加入如下行：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">vnoremap</span> &lt; &lt;<span class="keyword">gv</span></div><div class="line"><span class="keyword">vnoremap</span> &gt; &gt;<span class="keyword">gv</span></div></pre></td></tr></table></figure>
+<p>这样每次&lt;或&gt;后，会自动再选择缩进区域，只需要接着按&lt;或&gt;便可连续调整。</p>
+<p>gv的另一个用途类似，是改进p。<br>譬如，在替换几处文本时，如果我们觉得用s命令太麻烦，通常会用y复制新文本，再选中旧文本，按p去替换。这种效果可以实现的原理是，dcsxy等命令操作的文本会被填充无名寄存器””，而p在不指定寄存器时，使用的是无名寄存器中的内容，执行p操作时先取出无名寄存器中的内容（y复制的内容），再替换选中的内容。<br>选中的内容被删除，会进入无名寄存器中，故下次再执行p时，取出的是上次被替换的内容，而不是y复制的内容了。<br>为了多次替换，需要反复复制新内容。可以做如下映射来自动完成这个过程：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">vnoremap <span class="selector-tag">p</span> pgvy</div></pre></td></tr></table></figure>
+<h3 id="在Visual区域中跳转"><a href="#在Visual区域中跳转" class="headerlink" title="在Visual区域中跳转"></a>在Visual区域中跳转</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>o</td>
+<td>在起始与结束位置间跳转</td>
+</tr>
+<tr>
+<td>O</td>
+<td>在起始与结束位置间跳转</td>
+</tr>
+</tbody>
+</table>
+<p>在不同的Visual模式下o与O有些不太一样，谁试谁知道。</p>
+<h3 id="在Visual区域中编辑"><a href="#在Visual区域中编辑" class="headerlink" title="在Visual区域中编辑"></a>在Visual区域中编辑</h3><p>可使用的operator有：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">~, d, c, y, &gt;, <span class="tag">&lt;<span class="name">,</span> !, =<span class="string">,</span> <span class="attr">gq</span></span></div></pre></td></tr></table></figure>
+<p>可使用text object选择方法，即<code>[ai]x</code>形式。</p>
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">viw <span class="string">"选择当前光标所在位置的单词</span></div></pre></td></tr></table></figure>
+<p>可使用以下命令：</p>
+<figure class="highlight mathematica"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">:, r, s, <span class="keyword">C</span>, S, R, x, <span class="keyword">D</span>, X, Y, p, J, U, u, CTRL-], <span class="keyword">I</span>, A</div></pre></td></tr></table></figure>
+<p>在blockwise Visual模式下使用I可以在块中所有行前添加内容。</p>
+<p>用CTRL-V选中一块文本，如下：</p>
+<pre>
+<mark>H</mark>ello World!
+<mark>H</mark>ello World!
+</pre>
+
+<p>输入<code>IIt says</code>可将其修改成</p>
+<pre>
+It says Hello World!
+It says Hello World!
+</pre>
+
+
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;修改文本&quot;&gt;&lt;a href=&quot;#修改文本&quot; class=&quot;headerlink&quot; title=&quot;修改文本&quot;&gt;&lt;/a&gt;修改文本&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;功能&lt;/th&gt;
+&lt;th&gt;命令&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbod
+    
+    </summary>
+    
+    
+      <category term="cheatsheet" scheme="http://zoub.in/engineering/tags/cheatsheet/"/>
+    
+      <category term="vim" scheme="http://zoub.in/engineering/tags/vim/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>cheat sheet - mac os keyboard shortcuts</title>
+    <link href="http://zoub.in/engineering/2014/11/01/cheat-sheet-mac-os-keyboard-shortcuts/"/>
+    <id>http://zoub.in/engineering/2014/11/01/cheat-sheet-mac-os-keyboard-shortcuts/</id>
+    <published>2014-11-01T04:09:00.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="截屏"><a href="#截屏" class="headerlink" title="截屏"></a>截屏</h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Command-Shift-3</td>
+<td>将屏幕捕捉到文件</td>
+<td>Command-Shift-Control-3</td>
+<td>将屏幕内容捕捉到剪贴板</td>
+</tr>
+<tr>
+<td>Command-Shift-4</td>
+<td>将所选屏幕内容捕捉到一个文件，或按空格键仅捕捉一个窗口</td>
+<td>Command-Shift-Control-4</td>
+<td>将所选屏幕内容捕捉到剪贴板，或按空格键仅捕捉一个窗口</td>
+</tr>
+</tbody>
+</table>
+<h2 id="文本选择"><a href="#文本选择" class="headerlink" title="文本选择"></a>文本选择</h2><table>
+<thead>
+<tr>
+<th>动作</th>
+<th>按键</th>
+<th>动作</th>
+<th>按键</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>右移一个字符</td>
+<td>Control-F</td>
+<td>左移一个字符</td>
+<td>Control-B</td>
+</tr>
+<tr>
+<td>右删一个字符</td>
+<td>Control-D</td>
+<td>左删一个字符</td>
+<td>Control-H</td>
+</tr>
+<tr>
+<td>移至行末</td>
+<td>Control-E</td>
+<td>移至行首</td>
+<td>Control-A</td>
+</tr>
+<tr>
+<td>右删所有字符</td>
+<td>Control-K</td>
+<td>左删所有字符</td>
+<td>Control-U</td>
+</tr>
+<tr>
+<td>下移一行</td>
+<td>Control-N</td>
+<td>上移一行</td>
+<td>Control-P</td>
+</tr>
+<tr>
+<td>在光标后插入一行</td>
+<td>Control-O</td>
+<td>调换光标左右的字符</td>
+<td>Control-T</td>
+</tr>
+</tbody>
+</table>
+<p>以上的按键是较方便操作的，下面的按键要用到方向键，操作起来相对慢一点，但有时还是很有用的。</p>
+<ul>
+<li>Option操作的对象范围是单词（左右）或段落（上下）</li>
+<li>Command是行（左右）或文档（上下）</li>
+<li>fn是页（上下）或文档（左右）</li>
+<li>加上Shift是选中</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fn-上箭头</td>
+<td>向上滚动一页（相当于 Page Up 键）</td>
+<td>fn-下箭头</td>
+<td>向下滚动一页（相当于 Page Down 键）</td>
+</tr>
+<tr>
+<td>fn-左箭头</td>
+<td>滚动至文稿开头（相当于 Home 键）</td>
+<td>fn-右箭头</td>
+<td>滚动至文稿末尾（相当于 End 键）</td>
+</tr>
+<tr>
+<td>Command-右箭头</td>
+<td>将文本插入点移至当前行的行尾</td>
+<td>Command-左箭头</td>
+<td>将文本插入点移至当前行的行首</td>
+</tr>
+<tr>
+<td>Command-下箭头</td>
+<td>将文本插入点移至文稿末尾</td>
+<td>Command-上箭头</td>
+<td>将文本插入点移至文稿开头</td>
+</tr>
+<tr>
+<td>Option-右箭头</td>
+<td>将文本插入点移至下一个单词的末尾</td>
+<td>Option-左箭头</td>
+<td>将文本插入点移至上一个单词的开头</td>
+</tr>
+<tr>
+<td>Option-Delete</td>
+<td>删除光标左侧的词，以及词后的任何空格或标点符号</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Command-Shift-右箭头</td>
+<td>选中插入点与当前行行尾之间的文本</td>
+<td>Command-Shift-左箭头</td>
+<td>选中插入点与当前行行首之间的文本</td>
+</tr>
+<tr>
+<td>Command-Shift-上箭头</td>
+<td>选中插入点与文稿开头之间的文本</td>
+<td>Command-Shift-下箭头</td>
+<td>选中插入点与文稿末尾之间的文本</td>
+</tr>
+<tr>
+<td>Shift-左箭头</td>
+<td>将文本选择范围向左扩展一个字符</td>
+<td>Shift-右箭头</td>
+<td>将文本选择范围向右扩展一个字符</td>
+</tr>
+<tr>
+<td>Shift-上箭头</td>
+<td>将文本选择范围扩展到上一行相同水平位置的最近字符边缘</td>
+<td>Shift-下箭头</td>
+<td>将文本选择范围扩展到下一行相同水平位置的最近字符边缘</td>
+</tr>
+<tr>
+<td>Shift-Option-右箭头</td>
+<td>将文本选择范围扩展到当前词的词尾，再按一次则扩展到后一词的词尾</td>
+<td>Shift-Option-左箭头</td>
+<td>将文本选择范围扩展到当前词的词首，再按一次则扩展到后一词的词首</td>
+</tr>
+<tr>
+<td>Shift-Option-下箭头</td>
+<td>将文本选择范围扩展到当前段落的段尾，再按一次则扩展到下一段落的结尾</td>
+<td>Shift-Option-上箭头</td>
+<td>将文本选择范围扩展到当前段落的段首，再按一次则扩展到下一段落的段首</td>
+</tr>
+</tbody>
+</table>
+<h2 id="修饰键符号对照"><a href="#修饰键符号对照" class="headerlink" title="修饰键符号对照"></a>修饰键符号对照</h2><table>
+<thead>
+<tr>
+<th>符号</th>
+<th>键</th>
+<th>符号</th>
+<th>键</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⌘</td>
+<td>Command</td>
+<td>^</td>
+<td>Control</td>
+</tr>
+<tr>
+<td>⌥</td>
+<td>Option</td>
+<td>⇧</td>
+<td>Shift</td>
+</tr>
+<tr>
+<td>⇪</td>
+<td>Caps Lock</td>
+<td>fn</td>
+<td>功能键</td>
+</tr>
+</tbody>
+</table>
+<h2 id="睡眠与关机"><a href="#睡眠与关机" class="headerlink" title="睡眠与关机"></a>睡眠与关机</h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>电源按钮</td>
+<td>长按可强制关机，中长按显示“重新启动”/“睡眠”/“关机”对话框，短按开机</td>
+</tr>
+<tr>
+<td>Command-Control-电源按钮</td>
+<td>强制重启</td>
+</tr>
+<tr>
+<td>Control-⏏</td>
+<td>显示“重新启动”/“睡眠”/“关机”对话框</td>
+</tr>
+<tr>
+<td>Command-Option-⏏</td>
+<td>进入睡眠</td>
+</tr>
+<tr>
+<td>Command-Control-⏏</td>
+<td>退出所有应用软件（会让您先存储对已打开文稿所作的更改），然后重新启动电脑</td>
+</tr>
+<tr>
+<td>Command-Option-Control-⏏</td>
+<td>退出所有应用软件（会让您先存储对已打开文稿所作的更改），然后关闭电脑</td>
+</tr>
+<tr>
+<td>Shift-Control-⏏</td>
+<td>使所有显示器进入睡眠状态</td>
+</tr>
+</tbody>
+</table>
+<h2 id="应用软件"><a href="#应用软件" class="headerlink" title="应用软件"></a>应用软件</h2><table>
+<thead>
+<tr>
+<th>按键</th>
+<th>功能</th>
+<th>按键</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Command-{</td>
+<td>使所选内容左对齐</td>
+<td>Command-}</td>
+<td>使所选内容右对齐</td>
+</tr>
+<tr>
+<td>Command-&verbar;</td>
+<td>使所选内容居中对齐</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Command-Option-C</td>
+<td>拷贝所选项的格式设置并存储到剪贴板</td>
+<td>Command-Option-V</td>
+<td>将剪贴板中的格式设置粘贴（应用）到所选项。<br>如果之前复制的是文件，该命令是移动文件</td>
+</tr>
+<tr>
+<td>Command-Option-D</td>
+<td>显示或隐藏 Dock</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Command-G</td>
+<td>查找所选内容出现的下一个位置</td>
+<td>Command-Shift-G</td>
+<td>查找所选内容出现的上一个位置</td>
+</tr>
+<tr>
+<td>Command-H</td>
+<td>隐藏当前正在运行的应用软件窗口</td>
+<td>Command-Option-H</td>
+<td>隐藏所有其他正在运行的应用软件窗口</td>
+</tr>
+<tr>
+<td>Command-M</td>
+<td>将活跃窗口最小化至 Dock</td>
+<td>Command-Option-M</td>
+<td>将活跃应用软件的所有窗口最小化至 Dock</td>
+</tr>
+<tr>
+<td>Command-Z</td>
+<td>还原上一命令（有些应用软件允许多次还原）</td>
+<td>Command-Option-Z</td>
+<td>重做上一命令（有些应用软件允许多次重做）</td>
+</tr>
+<tr>
+<td>Command-左中括号 ([)</td>
+<td>上一浏览器网页</td>
+<td>Command-右中括号 (])</td>
+<td>下一浏览器网页</td>
+</tr>
+<tr>
+<td>Command-Option-esc</td>
+<td>选取要强制退出的应用软件</td>
+<td>Command-Shift-Option-Esc（按住三秒钟）</td>
+<td>强制退出最前面的应用软件</td>
+</tr>
+</tbody>
+</table>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="http://support.apple.com/kb/HT1343?viewlocale=zh_CN" target="_blank" rel="external">http://support.apple.com/kb/HT1343?viewlocale=zh_CN</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;截屏&quot;&gt;&lt;a href=&quot;#截屏&quot; class=&quot;headerlink&quot; title=&quot;截屏&quot;&gt;&lt;/a&gt;截屏&lt;/h2&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;按键&lt;/th&gt;
+&lt;th&gt;功能&lt;/th&gt;
+&lt;th&gt;按键&lt;/th&gt;
+&lt;th&gt;功能&lt;/th&gt;
+&lt;/tr
+    
+    </summary>
+    
+    
+      <category term="cheatsheet" scheme="http://zoub.in/engineering/tags/cheatsheet/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>character encoding</title>
+    <link href="http://zoub.in/engineering/2014/10/23/character-encoding/"/>
+    <id>http://zoub.in/engineering/2014/10/23/character-encoding/</id>
+    <published>2014-10-23T09:53:19.000Z</published>
+    <updated>2016-01-30T09:50:11.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>介绍字符编码的一些基本概念，以及unicode和utf-8, utf-16, utf-32的基本知识。</p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><h3 id="character-sets"><a href="#character-sets" class="headerlink" title="character sets"></a>character sets</h3><p>一组特定用途的字符形成的集合便是一个字符集（character set）。譬如简体汉字、英文、阿拉伯语等。当然，一个字符集中的字符不限于一门自然语言，可以包含各种字符。<br>譬如unicode字符集，便包含了地球上大部分的自然语言字符。</p>
+<h3 id="coded-character-sets"><a href="#coded-character-sets" class="headerlink" title="coded character sets"></a>coded character sets</h3><p>为了方便计算机处理，通常将一个字符集中所有的字符都一一映射到（编码成）一个数字（code point）。字符集对应的code point集合便是编码字符集（coded character set）。<br>譬如，在编码字符集ISO 8859-1中，code point 233代表字符’é’，但在编码字符集ISO 8859-5中，code point 233代表的是字符’щ’。而在unicode编码字符集同时收录了这两个字符，分别用code point 233, 1097代表。</p>
+<h3 id="character-encodings"><a href="#character-encodings" class="headerlink" title="character encodings"></a>character encodings</h3><p>数字在计算机底层可以用多种方式表示。譬如，可用1位’1’表示数字1，也可用两位’01’表示数字1.这个映射，便是字符编码（encoding），即将一个code point编码成一串0, 1。unicode通常的编码方式是utf-8，utf-16，utf-32。</p>
+<h2 id="unicode"><a href="#unicode" class="headerlink" title="unicode"></a>unicode</h2><p>code point是一个4到6位的16进制数，以”U+”开头。例如：</p>
+<ul>
+<li>ASCII whitespace: U+0009, U+000A, U+000C, U+000D, and U+0020</li>
+<li>ASCII digits: U+0030 to U+0039</li>
+<li>A-Z: U+0041 to U+005A</li>
+<li>a-z: U+0061 to U+007A</li>
+</ul>
+<p>对unicode中的code point有三种常见的编码：utf-8, utf-16, utf-32，如下图（来自<a href="http://www.w3.org/International/articles/definitions-characters/" target="_blank" rel="external">这里</a>）：</p>
+<p><img src="http://www.w3.org/International/articles/definitions-characters/images/encodings.png" alt="unicode encodings"></p>
+<h3 id="utf-8"><a href="#utf-8" class="headerlink" title="utf-8"></a>utf-8</h3><p>uft-8是一种变长的字符编码，即每一个code point在计算机里面的表示长度都不尽相同。具体见下表。</p>
+<table>
+<thead>
+<tr>
+<th>Bits</th>
+<th>lowest</th>
+<th>highest</th>
+<th>Bytes</th>
+<th>Byte 1</th>
+<th>Byte 2</th>
+<th>Byte 3</th>
+<th>Byte 4</th>
+<th>Byte 5</th>
+<th>Byte 6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7</td>
+<td>U+0000</td>
+<td>U+007F</td>
+<td>1</td>
+<td>0xxxxxxx</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td>U+0080</td>
+<td>U+07FF</td>
+<td>2</td>
+<td>110xxxxx</td>
+<td>10xxxxxx</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>16</td>
+<td>U+0800</td>
+<td>U+FFFF</td>
+<td>3</td>
+<td>1110xxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>21</td>
+<td>U+10000</td>
+<td>U+1FFFF</td>
+<td>4</td>
+<td>11110xxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>26</td>
+<td>U+200000</td>
+<td>U+3FFFFF</td>
+<td>5</td>
+<td>111110xx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td></td>
+</tr>
+<tr>
+<td>31</td>
+<td>U+4000000</td>
+<td>U+7FFFFF</td>
+<td>6</td>
+<td>1111110x</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+<td>10xxxxxx</td>
+</tr>
+</tbody>
+</table>
+<p>utf-8将比特流逐个字节解析，且解析出的字节可分成single bytes, leading bytes, continuation bytes三种。这三种字节表示的数值范围没有交集，因而可立即判断该如何解析。以下是更具体的特征：</p>
+<ul>
+<li>ASCII中0到127对应的字符用single bytes，以0开头</li>
+<li>高于127的code points用多个字节表示，首字节为leading byte, 其余为continuation byte</li>
+<li>leading byte高位上连续有两个以上的1，且其数目与该编码使用的字节数一样</li>
+<li>continuation byte高位为10</li>
+</ul>
+<p>在2003年，<a href="http://tools.ietf.org/html/rfc3629" target="_blank" rel="external">RFC 3629</a>规定utf-8最多编码到U+10FFFF。见<a href="http://en.wikipedia.org/wiki/Utf-8" target="_blank" rel="external">维基百科</a>。</p>
+<h3 id="utf-16"><a href="#utf-16" class="headerlink" title="utf-16"></a>utf-16</h3><p>与utf-8一样，是变长编码。常见的code point都用16位进行编码，其它的可能会占用更多的字节。见<a href="http://en.wikipedia.org/wiki/Utf-16" target="_blank" rel="external">维基百科</a>。</p>
+<h3 id="utf-32"><a href="#utf-32" class="headerlink" title="utf-32"></a>utf-32</h3><p>与utf-8和utf-16不一样，是定长编码，所有code point都用32位进行编码。见<a href="http://en.wikipedia.org/wiki/Utf-32" target="_blank" rel="external">维基百科</a>。</p>
+<h2 id="How-to-choose-a-character-encoding"><a href="#How-to-choose-a-character-encoding" class="headerlink" title="How to choose a character encoding?"></a>How to choose a character encoding?</h2><p>要想浏览器能正确解码收到的字节流，需要在编辑时将数据保存为一种编码A，服务器在提供内容时在header中指定文件类型（Content-Type）。都用utf-8可以保持最大的兼容性。</p>
+<h2 id="推荐教程"><a href="#推荐教程" class="headerlink" title="推荐教程"></a>推荐教程</h2><ul>
+<li><a href="http://www.w3.org/International/tutorials/tutorial-char-enc/" target="_blank" rel="external">http://www.w3.org/International/tutorials/tutorial-char-enc/</a></li>
+<li><a href="http://www.w3.org/International/questions/qa-what-is-encoding" target="_blank" rel="external">http://www.w3.org/International/questions/qa-what-is-encoding</a></li>
+<li><a href="http://www.w3.org/International/questions/qa-choosing-encodings" target="_blank" rel="external">http://www.w3.org/International/questions/qa-choosing-encodings</a></li>
+<li><a href="http://www.w3.org/International/articles/definitions-characters/" target="_blank" rel="external">http://www.w3.org/International/articles/definitions-characters/</a></li>
+</ul>
+<h2 id="更多参考"><a href="#更多参考" class="headerlink" title="更多参考"></a>更多参考</h2><ul>
+<li><a href="http://encoding.spec.whatwg.org/" target="_blank" rel="external">http://encoding.spec.whatwg.org/</a></li>
+<li><a href="http://www.unicode.org/versions/Unicode6.3.0/" target="_blank" rel="external">http://www.unicode.org/versions/Unicode6.3.0/</a></li>
+<li><a href="http://www.unicode.org/standard/principles.html" target="_blank" rel="external">http://www.unicode.org/standard/principles.html</a></li>
+</ul>
+<h3 id="utf-8-related"><a href="#utf-8-related" class="headerlink" title="utf-8 related"></a>utf-8 related</h3><ul>
+<li><a href="http://www.ietf.org/rfc/rfc3629.txt" target="_blank" rel="external">http://www.ietf.org/rfc/rfc3629.txt</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Utf-8" target="_blank" rel="external">http://en.wikipedia.org/wiki/Utf-8</a></li>
+<li><a href="http://www.cl.cam.ac.uk/~mgk25/ucs/ISO-10646-UTF-8.html" target="_blank" rel="external">http://www.cl.cam.ac.uk/~mgk25/ucs/ISO-10646-UTF-8.html</a></li>
+<li><a href="http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8" target="_blank" rel="external">http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8</a></li>
+</ul>
+<h3 id="more"><a href="#more" class="headerlink" title="more"></a>more</h3><ul>
+<li><a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html" target="_blank" rel="external">http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html</a></li>
+</ul>
+<h3 id="Tools"><a href="#Tools" class="headerlink" title="Tools"></a>Tools</h3><ul>
+<li><a href="http://www.decodeunicode.org/" target="_blank" rel="external">http://www.decodeunicode.org/</a></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;介绍字符编码的一些基本概念，以及unicode和utf-8, utf-16, utf-32的基本知识。&lt;/p&gt;
+&lt;h2 id=&quot;概念&quot;&gt;&lt;a href=&quot;#概念&quot; class=&quot;headerlink&quot; title=&quot;概念&quot;&gt;&lt;/a&gt;概念&lt;/h2&gt;&lt;h3 id=&quot;charac
+    
+    </summary>
+    
+    
+      <category term="basics" scheme="http://zoub.in/engineering/tags/basics/"/>
+    
+  </entry>
+  
+</feed>

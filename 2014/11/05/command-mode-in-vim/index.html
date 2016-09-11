@@ -161,10 +161,10 @@ Copy lines (a synonym forco)
     
     
     <!--STYLES-->
-    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css">
     <!--STYLES END-->
     
 </head>
@@ -234,7 +234,7 @@ Copy lines (a synonym forco)
             <li class="sidebar-button">
                 
                     <a  class="sidebar-button-link st-search-show-outputs"
-                         href="/engineering/#search"
+                         href="#search"
                         
                     >
                 
@@ -246,7 +246,7 @@ Copy lines (a synonym forco)
             <li class="sidebar-button">
                 
                     <a  class="sidebar-button-link "
-                         href="/engineering/#about"
+                         href="#about"
                         
                     >
                 
@@ -306,7 +306,7 @@ Copy lines (a synonym forco)
     
     <div class="post-content markdown" itemprop="articleBody">
         <div class="main-content-wrap">
-            <h2 id="ex_Commands">ex Commands</h2><table>
+            <h2 id="ex-Commands"><a href="#ex-Commands" class="headerlink" title="ex Commands"></a>ex Commands</h2><table>
 <thead>
 <tr>
 <th>command</th>
@@ -332,7 +332,7 @@ Copy lines (a synonym forco)
 </tr>
 </tbody>
 </table>
-<h3 id="指定操作的行范围">指定操作的行范围</h3><table>
+<h3 id="指定操作的行范围"><a href="#指定操作的行范围" class="headerlink" title="指定操作的行范围"></a>指定操作的行范围</h3><table>
 <thead>
 <tr>
 <th>命令形式</th>
@@ -430,7 +430,7 @@ Copy lines (a synonym forco)
 </tr>
 </tbody>
 </table>
-<h3 id="搜索">搜索</h3><p><code>:g</code>可以进行全局搜索。</p>
+<h3 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h3><p><code>:g</code>可以进行全局搜索。</p>
 <table>
 <thead>
 <tr>
@@ -476,9 +476,9 @@ Copy lines (a synonym forco)
 </tr>
 </tbody>
 </table>
-<h3 id="其它">其它</h3><h4 id="多条命令组合">多条命令组合</h4><p>可以用<code>|</code>来在同一行执行多条命令，相当于shell中的<code>;</code>。</p>
-<h4 id="添加到文件末尾">添加到文件末尾</h4><figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:<span class="number">300</span>,<span class="variable">$w</span>&gt;&gt;filename</span><br></pre></td></tr></table></figure>
-<h4 id="读取文件内容">读取文件内容</h4><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">:r</span> file</span><br><span class="line"><span class="symbol">:</span><span class="number">30</span>r file</span><br><span class="line"><span class="symbol">:</span><span class="variable">$r</span> file</span><br><span class="line"><span class="symbol">:</span>0r file</span><br><span class="line"><span class="symbol">:/pattern/r</span> file</span><br></pre></td></tr></table></figure>
+<h3 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h3><h4 id="多条命令组合"><a href="#多条命令组合" class="headerlink" title="多条命令组合"></a>多条命令组合</h4><p>可以用<code>|</code>来在同一行执行多条命令，相当于shell中的<code>;</code>。</p>
+<h4 id="添加到文件末尾"><a href="#添加到文件末尾" class="headerlink" title="添加到文件末尾"></a>添加到文件末尾</h4><figure class="highlight ruby"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">:</span><span class="number">300</span>,$w<span class="meta">&gt;&gt;</span>filename</div></pre></td></tr></table></figure>
+<h4 id="读取文件内容"><a href="#读取文件内容" class="headerlink" title="读取文件内容"></a>读取文件内容</h4><figure class="highlight elixir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">:r</span> file</div><div class="line"><span class="symbol">:</span><span class="number">30</span>r file</div><div class="line"><span class="symbol">:</span><span class="variable">$r</span> file</div><div class="line"><span class="symbol">:</span>0r file</div><div class="line"><span class="symbol">:/pattern/r</span> file</div></pre></td></tr></table></figure>
 
             
                 
@@ -523,17 +523,17 @@ Copy lines (a synonym forco)
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -602,17 +602,17 @@ Copy lines (a synonym forco)
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -638,17 +638,17 @@ Copy lines (a synonym forco)
                 <div id="share-options-bar" class="share-options-bar" data-behavior="3">
     <ul class="share-options">
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2014/11/05/command-mode-in-vim/">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2014/11/05/command-mode-in-vim/">
                 <i class="fa fa-twitter"></i><span>Share on Twitter</span>
             </a>
         </li>
@@ -683,10 +683,10 @@ Copy lines (a synonym forco)
         <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
     </body>
     <!--SCRIPTS-->
-<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js"></script>
+<script src="/engineering/assets/js/tranquilpeak.js"></script>
 <!--SCRIPTS END-->
 
     <script type="text/javascript">

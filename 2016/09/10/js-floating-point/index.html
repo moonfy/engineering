@@ -1,0 +1,535 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="generator" content="心止在焉">
+    <title>JS中使用大数的问题 - 心止在焉</title>
+    <meta name="author" content="Bin Zou">
+    
+    
+        <link rel="alternative" type="application/atom+xml" title="RSS" href="/engineering/atom.xml">
+    
+    <meta name="description" content="前后端大数精度不一致可能引起问题JS中Number类型以64位的双精度浮点型表示，其能表示的整数范围有限，且大于一定值时可表达的整数值不再连续。因此，如果后端传给前端一个JS中无法表达的整数值（譬如64位的大整数），则JS在存储时将寻找一个近似值代替，导致前后端保存的是不一样的值，从而在某些使用场景中出现问题，譬如作为对象的key。
+所以，后端要尽量避免传给前端大整数值，因为这个整数值前端根本用不">
+<meta property="og:type" content="blog">
+<meta property="og:title" content="JS中使用大数的问题">
+<meta property="og:url" content="http://zoub.in/engineering/2016/09/10/js-floating-point/index.html">
+<meta property="og:site_name" content="心止在焉">
+<meta property="og:description" content="前后端大数精度不一致可能引起问题JS中Number类型以64位的双精度浮点型表示，其能表示的整数范围有限，且大于一定值时可表达的整数值不再连续。因此，如果后端传给前端一个JS中无法表达的整数值（譬如64位的大整数），则JS在存储时将寻找一个近似值代替，导致前后端保存的是不一样的值，从而在某些使用场景中出现问题，譬如作为对象的key。
+所以，后端要尽量避免传给前端大整数值，因为这个整数值前端根本用不">
+<meta property="og:updated_time" content="2016-09-11T14:54:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JS中使用大数的问题">
+<meta name="twitter:description" content="前后端大数精度不一致可能引起问题JS中Number类型以64位的双精度浮点型表示，其能表示的整数范围有限，且大于一定值时可表达的整数值不再连续。因此，如果后端传给前端一个JS中无法表达的整数值（譬如64位的大整数），则JS在存储时将寻找一个近似值代替，导致前后端保存的是不一样的值，从而在某些使用场景中出现问题，譬如作为对象的key。
+所以，后端要尽量避免传给前端大整数值，因为这个整数值前端根本用不">
+    
+    
+    
+    
+    
+    
+    <!--STYLES-->
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css">
+    <!--STYLES END-->
+    
+</head>
+
+    <body>
+        <div id="blog">
+            <header id="header" data-behavior="3">
+    <i id="btn-open-sidebar" class="fa fa-lg fa-bars"></i>
+    <h1 class="header-title">
+        <a class="header-title-link" href="/engineering/ ">心止在焉</a>
+    </h1>
+    
+</header>
+            <nav id="sidebar" data-behavior="3">
+    
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/ "
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-home"></i>
+                    <span class="sidebar-button-desc">Home</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-categories"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-bookmark"></i>
+                    <span class="sidebar-button-desc">Categories</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-tags"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-tags"></i>
+                    <span class="sidebar-button-desc">Tags</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/all-archives"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-archive"></i>
+                    <span class="sidebar-button-desc">Archive</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link st-search-show-outputs"
+                         href="#search"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-search"></i>
+                    <span class="sidebar-button-desc">Search</span>
+                </a>
+        </li>
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="#about"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-question"></i>
+                    <span class="sidebar-button-desc">About</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+    </ul>
+    
+        <ul class="sidebar-buttons">
+        
+            <li class="sidebar-button">
+                
+                    <a  class="sidebar-button-link "
+                         href="/engineering/atom.xml"
+                        
+                    >
+                
+                    <i class="sidebar-button-icon fa fa-lg fa-rss"></i>
+                    <span class="sidebar-button-desc">RSS</span>
+                </a>
+        </li>
+        
+    </ul>
+    
+</nav>
+
+            
+            <div id="main" data-behavior="3"
+                 class="
+                        hasCoverMetaIn
+                        ">
+                
+<article class="post" itemscope itemType="http://schema.org/BlogPosting">
+    
+    
+        <div class="post-header main-content-wrap text-left">
+    
+        <h1 class="post-title" itemprop="headline">
+            JS中使用大数的问题
+        </h1>
+    
+    <div class="post-meta">
+    <time itemprop="datePublished" content="Sat Sep 10 2016 23:00:00 GMT+0800">
+	
+		    Sep 10, 2016
+    	
+    </time>
+    
+</div>
+</div>
+    
+    <div class="post-content markdown" itemprop="articleBody">
+        <div class="main-content-wrap">
+            <h2 id="前后端大数精度不一致可能引起问题"><a href="#前后端大数精度不一致可能引起问题" class="headerlink" title="前后端大数精度不一致可能引起问题"></a>前后端大数精度不一致可能引起问题</h2><p>JS中Number类型以64位的双精度浮点型表示，其能表示的整数范围有限，且大于一定值时可表达的整数值不再连续。<br>因此，如果后端传给前端一个JS中无法表达的整数值（譬如64位的大整数），则JS在存储时将寻找一个近似值代替，导致前后端保存的是不一样的值，从而在某些使用场景中出现问题，譬如作为对象的key。</p>
+<p>所以，后端要尽量避免传给前端大整数值，因为这个整数值前端根本用不了，一使用就可能出错。</p>
+<p>本文将介绍Number类型可表达的值范围，并总结一些因为该范围限制而可能出现的问题。</p>
+<h2 id="浮点数形式"><a href="#浮点数形式" class="headerlink" title="浮点数形式"></a>浮点数形式</h2><p><a href="https://en.wikipedia.org/wiki/IEEE_floating_point" target="_blank" rel="external">IEEE 754-2008</a>这个规范定义了一种浮点数的形式，以及近似规则。其浮点数有以下形式：</p>
+<p>V = (-1)^s * M * 2^E</p>
+<p>可以看出，这种形式的浮点数，其值由三个因素决定：</p>
+<ul>
+<li>符号位 s。有两种可能值，1 表示负数，0 表示正数。需要占用 1 位。</li>
+<li>尾数 M。有效数字。</li>
+<li>指数 E。控制小数点位置。</li>
+</ul>
+<p>假设用 m 位二进制表示浮点数 V，则将其分为三部分（从最高位到最低位）：符号位（1位）、指数（k位）、尾数（n位）。</p>
+<p>例如，</p>
+<table>
+<thead>
+<tr>
+<th>&nbsp;</th>
+<th>m</th>
+<th>s</th>
+<th>k</th>
+<th>n</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单精度</td>
+<td>32</td>
+<td>1</td>
+<td>8</td>
+<td>23</td>
+</tr>
+<tr>
+<td>双精度</td>
+<td>64</td>
+<td>1</td>
+<td>11</td>
+<td>52</td>
+</tr>
+</tbody>
+</table>
+<h2 id="可表示的浮点数值"><a href="#可表示的浮点数值" class="headerlink" title="可表示的浮点数值"></a>可表示的浮点数值</h2><p>假设决定尾数的 n 位二进制为 f，决定指数的 k 位二进制为 e。<br>根据 e 的模式，这种形式可表示的浮点数可分为三类：</p>
+<table>
+<thead>
+<tr>
+<th>&nbsp;</th>
+<th>e</th>
+<th>E</th>
+<th>M</th>
+<th>V</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非规范值</td>
+<td>全 0</td>
+<td>1 - Bias</td>
+<td>0.f</td>
+<td>(-1)^s * 0.f * 2^(1 - Bias)</td>
+</tr>
+<tr>
+<td>特殊值</td>
+<td>全 1</td>
+<td>e</td>
+<td>任意</td>
+<td>Infinity, -Infinity 或 NaN</td>
+</tr>
+<tr>
+<td>规范值</td>
+<td>其它</td>
+<td>e - Bias</td>
+<td>1.f</td>
+<td>(-1)^s * 1.f * 2^(e - Bias)</td>
+</tr>
+</tbody>
+</table>
+<p>上面的表格中 Bias = 2^(k - 1) - 1。对于双精度而言，Bias = 1023。</p>
+<p>对于特殊值，f 为全 0 时，表示 Infinity 或 -Infinity，符号取决于符号位 s；f 为其它值时，表示 NaN。<br>可见，特殊值一共有 2^(n + 1) 种，其中包括 Infinity、-Infinity 和 2^(n + 1) - 2 个视作 NaN 的数。</p>
+<p>非规范值（不包含0）的绝对值最小值为 2^(-n) * 2^(1 - Bias)，最大值为 (1 - 2^(-n)) * 2^(1 - Bias)。<br>f 为 0 时 V = 0，随 s 的不同有正负 0 两个。</p>
+<p>规范值的绝对值最小值为 2^(1- Bias)，最大值为 (2 - 2^(-n)) * 2^( 2^(k - 1) - 1 )。</p>
+<p>设 epsilon = 2^(-n)，对于双精度而言，epsilon = 2^(-52)，规范值与非规范值（不包含0）的绝对值范围为：</p>
+<table>
+<thead>
+<tr>
+<th>&nbsp;</th>
+<th>MIN</th>
+<th>MAX</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非规范值</td>
+<td>epsilon * 2^(-1022)</td>
+<td>(1 - epsilon) * 2^(-1022)</td>
+</tr>
+<tr>
+<td>规范值</td>
+<td>2^(-1022)</td>
+<td>(2 - epsilon) * 2^1023</td>
+</tr>
+</tbody>
+</table>
+<p>可表示的浮点数一定在上面的范围中，但在范围内的浮点数不一定能被表示，则会根据规则做一定近似。</p>
+<h2 id="可表示的整数值"><a href="#可表示的整数值" class="headerlink" title="可表示的整数值"></a>可表示的整数值</h2><p>从前面的浮点数值范围可以知道，可表示的整数都是规范值。</p>
+<p>尾数（1.f）一共有 (n + 1) 位，通过指数移动小数点可使 V 为整数，其值范围为 [1, 2^(n+1) - 1]，这个区间内的任意整数都是可以表示的，这是一个连续的整数区间。<br>从表示形式可以看出，任何 2^x 的整数都是可表示的，所以，也可以说[1, 2^(n+1)]区间是一个连续的整数区间。但是大于2^(n+1)的整数，则不一定能被表示。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>)</div><div class="line"><span class="comment">// 9007199254740992</span></div><div class="line"><span class="comment">// 可表示</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">1</span></div><div class="line"><span class="comment">// 9007199254740992</span></div><div class="line"><span class="comment">// 不可表示，用 9007199254740992 近似</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">2</span></div><div class="line"><span class="comment">// 9007199254740994</span></div><div class="line"><span class="comment">// 可表示</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">3</span></div><div class="line"><span class="comment">// 9007199254740996</span></div><div class="line"><span class="comment">// 不可表示，用 9007199254740996 近似</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">4</span></div><div class="line"><span class="comment">// 9007199254740996</span></div><div class="line"><span class="comment">// 可表示</span></div></pre></td></tr></table></figure>
+<p><strong>Number可安全表示的正整数范围</strong> ：[1, 2^53]。超过2^53，便开始出现不可表示的情况。</p>
+<p>近似的规则：</p>
+<ul>
+<li>寻找最近的可表示数</li>
+<li>如果有两个最近的可表示数，则取最小有效位为偶数的</li>
+</ul>
+<p>这种近似并非四舍五入，且值越大的区间，可表示的数就越稀疏（绝对误差越大）。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">(<span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">53</span>) + <span class="number">3</span>) * <span class="number">4</span></div><div class="line"><span class="comment">// 36028797018963980</span></div><div class="line"></div><div class="line"><span class="number">36028797018963988</span></div><div class="line"><span class="comment">// 36028797018963980</span></div><div class="line"></div><div class="line"><span class="number">36028797018963989</span></div><div class="line"><span class="comment">// 36028797018963990</span></div></pre></td></tr></table></figure></p>
+<p>这种近似规则的说明可见<a href="https://en.wikipedia.org/wiki/Rounding#Round_half_to_even" target="_blank" rel="external">rounding</a>。</p>
+<p><strong>Help</strong><br>从<a href="https://en.wikipedia.org/wiki/IEEE_floating_point" target="_blank" rel="external">IEEE 754-2008</a>中关于近似的说明看，上述规则是默认的规则，似乎是可以由实现覆盖的。<br>譬如上面例子中 Math.pow(2, 53) + 1 与 Math.pow(2, 53) + 3 的近似就很难用这个默认规则说明。<br>也许是Chrome的实现并未使用这个默认规则？</p>
+<p><strong>Help</strong><br>9007199254740995 （<code>Math.pow(2, 53) + 3</code>）是不可表示的，但 18014398509481990 (=9007199254740995 * 2) 又是可表示的，这是为什么？</p>
+<h2 id="Number中几个特殊值含义"><a href="#Number中几个特殊值含义" class="headerlink" title="Number中几个特殊值含义"></a>Number中几个特殊值含义</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">Number</span>.EPSILON</div><div class="line"><span class="comment">// 2.220446049250313e-16</span></div><div class="line"><span class="comment">// 即二进制表示中有效数字，其含义是大于数字 1 的最小数字与 1 的差。</span></div><div class="line"></div><div class="line"><span class="built_in">Number</span>.MAX_SAFE_INTEGER</div><div class="line"><span class="comment">// 9007199254740991</span></div><div class="line"><span class="comment">// Math.pow(2, 53) - 1</span></div><div class="line"><span class="comment">// 连续整数区间的终点</span></div><div class="line"><span class="built_in">Number</span>.MIN_SAFE_INTEGER</div><div class="line"><span class="comment">// -9007199254740991</span></div><div class="line"></div><div class="line"><span class="built_in">Number</span>.NaN</div><div class="line"><span class="comment">// NaN</span></div><div class="line"><span class="built_in">Number</span>.POSITIVE_INFINITY</div><div class="line"><span class="comment">// Infinity</span></div><div class="line"><span class="built_in">Number</span>.NEGATIVE_INFINITY</div><div class="line"><span class="comment">// -Infinity</span></div><div class="line"></div><div class="line"><span class="built_in">Number</span>.MAX_VALUE</div><div class="line"><span class="comment">// 1.7976931348623157e+308</span></div><div class="line"><span class="comment">// (2 - Number.EPSILON) * Math.pow(2, 1023)</span></div><div class="line"><span class="built_in">Number</span>.MIN_VALUE</div><div class="line"><span class="comment">// 5e-324</span></div><div class="line"><span class="comment">// Number.EPSILON * Math.pow(2, -1022)</span></div></pre></td></tr></table></figure>
+<h2 id="使用浮点数容易出现的问题"><a href="#使用浮点数容易出现的问题" class="headerlink" title="使用浮点数容易出现的问题"></a>使用浮点数容易出现的问题</h2><h3 id="解析后端传过来的超过安全范围的整数"><a href="#解析后端传过来的超过安全范围的整数" class="headerlink" title="解析后端传过来的超过安全范围的整数"></a>解析后端传过来的超过安全范围的整数</h3><p>如果后端使用了64位的无符号整数，就有可能超过 2^53，前端在解析时就可能会丢失精度。<br>如果前端将丢失精度的值当作key值去查找后端提供的数据，就会找不到对应的数值。<br>因此，<strong>后端传给前端的整数不应当超过 2^53 </strong> 。</p>
+<h3 id="浮点数加减的结果精度不够"><a href="#浮点数加减的结果精度不够" class="headerlink" title="浮点数加减的结果精度不够"></a>浮点数加减的结果精度不够</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="number">0.2</span> + <span class="number">0.4</span></div><div class="line"><span class="comment">// 0.6000000000000001</span></div></pre></td></tr></table></figure>
+<p>前端用于展示的浮点数（如价格），如果需要计算，不应当直接使用原生的操作符。<br>解决方案可以参考<a href="https://github.com/zoubin/math-hacker" target="_blank" rel="external">math-hacker</a>。</p>
+<h3 id="Number-prototype-toFixed-precision-与Math-round-float-取整规则不一样"><a href="#Number-prototype-toFixed-precision-与Math-round-float-取整规则不一样" class="headerlink" title="Number.prototype.toFixed(precision)与Math.round(float)取整规则不一样"></a>Number.prototype.toFixed(precision)与Math.round(float)取整规则不一样</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">Math</span>.round(<span class="number">2.4</span>)</div><div class="line"><span class="comment">// 2</span></div><div class="line"><span class="built_in">Math</span>.round(<span class="number">2.5</span>)</div><div class="line"><span class="comment">// 3</span></div><div class="line"></div><div class="line">(<span class="number">2.385</span>).toFixed(<span class="number">2</span>)</div><div class="line"><span class="comment">// '2.38'</span></div><div class="line">(<span class="number">2.3851</span>).toFixed(<span class="number">2</span>)</div><div class="line"><span class="comment">// '2.39'</span></div><div class="line">(<span class="number">2.384</span>).toFixed(<span class="number">2</span>)</div><div class="line"><span class="comment">// '2.38'</span></div></pre></td></tr></table></figure>
+<p>因此，想通过toFixed去控制显示的小数位数可能会与用户的习惯（四舍五入）不一致。<br>解决方案可以参考<a href="https://github.com/zoubin/math-hacker" target="_blank" rel="external">math-hacker</a>。</p>
+<h3 id="位操作时会当作32位整数处理"><a href="#位操作时会当作32位整数处理" class="headerlink" title="位操作时会当作32位整数处理"></a>位操作时会当作32位整数处理</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">31</span>)</div><div class="line"><span class="comment">// 2147483648</span></div><div class="line"></div><div class="line"><span class="comment">// 取半</span></div><div class="line"><span class="number">2147483648</span> &gt;&gt; <span class="number">1</span></div><div class="line"><span class="comment">// -1073741824</span></div><div class="line"></div><div class="line"><span class="built_in">Math</span>.pow(<span class="number">2</span>, <span class="number">31</span>) - <span class="number">2</span></div><div class="line"><span class="comment">// 2147483646</span></div><div class="line"></div><div class="line"><span class="comment">// 取半</span></div><div class="line"><span class="number">2147483646</span> &gt;&gt; <span class="number">1</span></div><div class="line"><span class="comment">// 1073741823</span></div></pre></td></tr></table></figure>
+<p>因此，位操作时需要确保不超过32位可表示的整数范围。</p>
+
+            
+                
+
+            
+        </div>
+    </div>
+    <div class="post-footer main-content-wrap">
+        
+            <div class="post-footer-tags">
+                <span class="text-color-light text-small">TAGGED IN</span><br/>
+                
+    <a class="tag tag--primary tag--small t-link" href="/engineering/tags/JavaScript/">JavaScript</a>
+
+            </div>
+        
+        <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2016/01/30/node-stream-programming/" data-tooltip="Node.js Stream - 程序设计">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+        
+            <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+        
+    </div>
+</article>
+
+
+
+                <footer id="footer" class="main-content-wrap">
+    <span class="copyrights">
+        Copyrights &copy; 2016 Bin Zou. All Rights Reserved.
+    </span>
+</footer>
+
+            </div>
+            
+                <div id="bottom-bar" class="post-bottom-bar" data-behavior="3">
+                    <div class="post-actions-wrap">
+    <nav>
+        <ul class="post-actions post-action-nav">
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--disabled">
+                
+                    <i class="fa fa-angle-left"></i>
+                    <span class="hide-xs hide-sm text-small icon-ml">PREVIOUS</span>
+                </a>
+            </li>
+            <li class="post-action">
+                
+                    <a class="post-action-btn btn btn--default tooltip--top" href="/engineering/2016/01/30/node-stream-programming/" data-tooltip="Node.js Stream - 程序设计">
+                
+                    <span class="hide-xs hide-sm text-small icon-mr">NEXT</span>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <ul class="post-actions post-action-share">
+        <li class="post-action hide-lg hide-md hide-sm">
+            <a class="post-action-btn btn btn--default btn-open-shareoptions"  href="#btn-open-shareoptions">
+                <i class="fa fa-share-alt"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-google-plus"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-facebook-official"></i>
+            </a>
+        </li>
+        <li class="post-action hide-xs">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </li>
+        
+            <li class="post-action">
+                <a class="post-action-btn btn btn--default" href="#disqus_thread">
+                    <i class="fa fa-comment-o"></i>
+                </a>
+            </li>
+        
+        <li class="post-action">
+            
+                <a class="post-action-btn btn btn--default" href="#">
+            
+                <i class="fa fa-list"></i>
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+                </div>
+                <div id="share-options-bar" class="share-options-bar" data-behavior="3">
+    <ul class="share-options">
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
+            </a>
+        </li>
+        <li class="share-option">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2016/09/10/js-floating-point/">
+                <i class="fa fa-twitter"></i><span>Share on Twitter</span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div id="share-options-mask" class="share-options-mask"></div>
+            
+        </div>
+        <div id="about">
+    <div id="about-card">
+        <div id="about-btn-close">
+            <i class="fa fa-remove"></i>
+        </div>
+        
+            <h4 id="about-card-name">Bin Zou</h4>
+        
+            <h5 id="about-card-bio"><p><img src="https://avatars1.githubusercontent.com/u/2097644?v=3&amp;s=100" alt="avatar"></p>
+</h5>
+        
+        
+            <h5 id="about-card-job">
+                <i class="fa fa-briefcase"></i>
+                <br/>
+                <p>Frontend Engineer</p>
+
+            </h5>
+        
+        
+    </div>
+</div>
+
+        <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
+    </body>
+    <!--SCRIPTS-->
+<script src="/engineering/assets/js/jquery.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js"></script>
+<script src="/engineering/assets/js/tranquilpeak.js"></script>
+<!--SCRIPTS END-->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'zoubin';
+        (function() {
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+
+
+    <script type="text/javascript">
+        (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+                (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+            e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+        })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+        _st('install','JrgMusyGYH38rsYxCTiq','2.0.0');
+    </script>
+
+
+</html>

@@ -29,10 +29,10 @@
     
     
     <!--STYLES-->
-    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css">
     <!--STYLES END-->
     
 </head>
@@ -102,7 +102,7 @@
             <li class="sidebar-button">
                 
                     <a  class="sidebar-button-link st-search-show-outputs"
-                         href="/engineering/#search"
+                         href="#search"
                         
                     >
                 
@@ -114,7 +114,7 @@
             <li class="sidebar-button">
                 
                     <a  class="sidebar-button-link "
-                         href="/engineering/#about"
+                         href="#about"
                         
                     >
                 
@@ -174,12 +174,12 @@
     
     <div class="post-content markdown" itemprop="articleBody">
         <div class="main-content-wrap">
-            <h2 id="obj-hasOwnProperty(‘proto‘)_===_false">obj.hasOwnProperty(‘<strong>proto</strong>‘) === false</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> o = &#123;&#125;</span><br><span class="line"></span><br><span class="line">print(<span class="string">'toString'</span>, o)</span><br><span class="line">o.toString = <span class="literal">true</span></span><br><span class="line">print(<span class="string">'toString'</span>, o)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'__proto__'</span>, o)</span><br><span class="line">o.__proto__ = <span class="literal">true</span></span><br><span class="line">print(<span class="string">'__proto__'</span>, o)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">print</span>(<span class="params">name, obj</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(</span><br><span class="line">    <span class="string">'name:'</span>, name,</span><br><span class="line">    <span class="string">','</span>,</span><br><span class="line">    <span class="string">'typeof:'</span>, <span class="keyword">typeof</span> obj[name],</span><br><span class="line">    <span class="string">','</span>,</span><br><span class="line">    <span class="string">'hasOwnProperty:'</span>, <span class="built_in">Object</span>.prototype.hasOwnProperty.call(obj, name)</span><br><span class="line">  )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+            <h2 id="obj-hasOwnProperty-‘proto‘-false"><a href="#obj-hasOwnProperty-‘proto‘-false" class="headerlink" title="obj.hasOwnProperty(‘proto‘) === false"></a>obj.hasOwnProperty(‘<strong>proto</strong>‘) === false</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> o = &#123;&#125;</div><div class="line"></div><div class="line">print(<span class="string">'toString'</span>, o)</div><div class="line">o.toString = <span class="literal">true</span></div><div class="line">print(<span class="string">'toString'</span>, o)</div><div class="line"></div><div class="line">print(<span class="string">'__proto__'</span>, o)</div><div class="line">o.__proto__ = <span class="literal">true</span></div><div class="line">print(<span class="string">'__proto__'</span>, o)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">print</span>(<span class="params">name, obj</span>) </span>&#123;</div><div class="line">  <span class="built_in">console</span>.log(</div><div class="line">    <span class="string">'name:'</span>, name,</div><div class="line">    <span class="string">','</span>,</div><div class="line">    <span class="string">'typeof:'</span>, <span class="keyword">typeof</span> obj[name],</div><div class="line">    <span class="string">','</span>,</div><div class="line">    <span class="string">'hasOwnProperty:'</span>, <span class="built_in">Object</span>.prototype.hasOwnProperty.call(obj, name)</div><div class="line">  )</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>output:</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> function , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></span><br><span class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> <span class="typename">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> object , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></span><br><span class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> object , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
-<h2 id="Object-create(null)">Object.create(null)</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> o = <span class="built_in">Object</span>.create(<span class="literal">null</span>)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'toString'</span>, o)</span><br><span class="line">o.toString = <span class="literal">true</span></span><br><span class="line">print(<span class="string">'toString'</span>, o)</span><br><span class="line"></span><br><span class="line">print(<span class="string">'__proto__'</span>, o)</span><br><span class="line">o.__proto__ = <span class="literal">true</span></span><br><span class="line">print(<span class="string">'__proto__'</span>, o)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">print</span>(<span class="params">name, obj</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(</span><br><span class="line">    <span class="string">'name:'</span>, name,</span><br><span class="line">    <span class="string">','</span>,</span><br><span class="line">    <span class="string">'typeof:'</span>, <span class="keyword">typeof</span> obj[name],</span><br><span class="line">    <span class="string">','</span>,</span><br><span class="line">    <span class="string">'hasOwnProperty:'</span>, <span class="built_in">Object</span>.prototype.hasOwnProperty.call(obj, name)</span><br><span class="line">  )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> function , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div><div class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> <span class="keyword">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></div><div class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> object , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div><div class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> object , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div></pre></td></tr></table></figure>
+<h2 id="Object-create-null"><a href="#Object-create-null" class="headerlink" title="Object.create(null)"></a>Object.create(null)</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> o = <span class="built_in">Object</span>.create(<span class="literal">null</span>)</div><div class="line"></div><div class="line">print(<span class="string">'toString'</span>, o)</div><div class="line">o.toString = <span class="literal">true</span></div><div class="line">print(<span class="string">'toString'</span>, o)</div><div class="line"></div><div class="line">print(<span class="string">'__proto__'</span>, o)</div><div class="line">o.__proto__ = <span class="literal">true</span></div><div class="line">print(<span class="string">'__proto__'</span>, o)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">print</span>(<span class="params">name, obj</span>) </span>&#123;</div><div class="line">  <span class="built_in">console</span>.log(</div><div class="line">    <span class="string">'name:'</span>, name,</div><div class="line">    <span class="string">','</span>,</div><div class="line">    <span class="string">'typeof:'</span>, <span class="keyword">typeof</span> obj[name],</div><div class="line">    <span class="string">','</span>,</div><div class="line">    <span class="string">'hasOwnProperty:'</span>, <span class="built_in">Object</span>.prototype.hasOwnProperty.call(obj, name)</div><div class="line">  )</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>output:</p>
-<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> undefined , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></span><br><span class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> <span class="typename">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> undefined , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></span><br><span class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> <span class="typename">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> undefined , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div><div class="line"><span class="string">name:</span> toString , <span class="string">typeof:</span> <span class="keyword">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></div><div class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> undefined , <span class="string">hasOwnProperty:</span> <span class="literal">false</span></div><div class="line"><span class="string">name:</span> __proto__ , <span class="string">typeof:</span> <span class="keyword">boolean</span> , <span class="string">hasOwnProperty:</span> <span class="literal">true</span></div></pre></td></tr></table></figure>
 
             
                 
@@ -224,17 +224,17 @@
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -303,17 +303,17 @@
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -339,17 +339,17 @@
                 <div id="share-options-bar" class="share-options-bar" data-behavior="3">
     <ul class="share-options">
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2015/11/18/prototype-in-js/">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2015/11/18/prototype-in-js/">
                 <i class="fa fa-twitter"></i><span>Share on Twitter</span>
             </a>
         </li>
@@ -384,10 +384,10 @@
         <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
     </body>
     <!--SCRIPTS-->
-<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js"></script>
+<script src="/engineering/assets/js/tranquilpeak.js"></script>
 <!--SCRIPTS END-->
 
     <script type="text/javascript">

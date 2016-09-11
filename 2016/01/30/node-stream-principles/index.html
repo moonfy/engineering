@@ -41,10 +41,10 @@
     
     
     <!--STYLES-->
-    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css">
     <!--STYLES END-->
     
 </head>
@@ -114,7 +114,7 @@
             <li class="sidebar-button">
                 
                     <a  class="sidebar-button-link st-search-show-outputs"
-                         href="/engineering/#search"
+                         href="#search"
                         
                     >
                 
@@ -126,7 +126,7 @@
             <li class="sidebar-button">
                 
                     <a  class="sidebar-button-link "
-                         href="/engineering/#about"
+                         href="#about"
                         
                     >
                 
@@ -186,7 +186,7 @@
     
     <div class="post-content markdown" itemprop="articleBody">
         <div class="main-content-wrap">
-            <h2 id="前言">前言</h2><p>在构建大型系统时，通常将其拆解为功能独立的若干部分，<br>这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。</p>
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在构建大型系统时，通常将其拆解为功能独立的若干部分，<br>这些部分的接口都遵循一定的规范，通过某种方式连接起来，以共同完成较复杂的任务。</p>
 <p>在unix中，shell通过管道<code>|</code>连接各部分，其输入输出的规范是文本流。<br>在<a href="https://nodejs.org/" target="_blank" rel="external">Node.js</a>中，内置的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>模块也实现了类似功能，组件间通过<code>.pipe()</code>连接。</p>
 <p>本系列试着从三个方面介绍<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>相关的内容，这三部分各自独立，无须从头至尾全部读完。</p>
 <ul>
@@ -194,8 +194,8 @@
 <li>第二部分：<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层实现管窥。重点剖析<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>底层是如何支持流式数据处理的，以及<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>提供的<code>backpressure mechanism</code>是如何实现的。</li>
 <li>第三部分：介绍如何使用<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>进行程序设计。这部分会着重解析<a href="https://github.com/substack/node-browserify" target="_blank" rel="external">Browserify</a>和<a href="https://github.com/gulpjs/gulp" target="_blank" rel="external">Gulp</a>的<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>设计模式，并基于<a href="https://nodejs.org/api/stream.html" target="_blank" rel="external">stream</a>构建一个为<a href="https://git-scm.com/" target="_blank" rel="external">Git</a>仓库自动生成changelog的应用。</li>
 </ul>
-<h2 id="Stream原理">Stream原理</h2><p>TBD</p>
-<h2 id="参考文献">参考文献</h2><ul>
+<h2 id="Stream原理"><a href="#Stream原理" class="headerlink" title="Stream原理"></a>Stream原理</h2><p>TBD</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
 <li><a href="https://github.com/substack/browserify-handbook" target="_blank" rel="external">substack#browserify-handbook</a></li>
 <li><a href="https://github.com/zoubin/streamify-your-node-program" target="_blank" rel="external">zoubin#streamify-your-node-program</a></li>
 </ul>
@@ -243,17 +243,17 @@
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -322,17 +322,17 @@
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-google-plus"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-facebook-official"></i>
             </a>
         </li>
         <li class="post-action hide-xs">
-            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="post-action-btn btn btn--default" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-twitter"></i>
             </a>
         </li>
@@ -358,17 +358,17 @@
                 <div id="share-options-bar" class="share-options-bar" data-behavior="3">
     <ul class="share-options">
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="share-option-btn" target="new" href="https://plus.google.com/share?url=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-google-plus"></i><span class="">Share on Google Plus</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="share-option-btn" target="new" href="https://www.facebook.com/sharer/sharer.php?u=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-facebook-official"></i><span>Share on Facebook</span>
             </a>
         </li>
         <li class="share-option">
-            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/2016/01/30/node-stream-principles/">
+            <a class="share-option-btn" target="new" href="https://twitter.com/intent/tweet?text=http://zoub.in/engineering/engineering/2016/01/30/node-stream-principles/">
                 <i class="fa fa-twitter"></i><span>Share on Twitter</span>
             </a>
         </li>
@@ -403,10 +403,10 @@
         <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
     </body>
     <!--SCRIPTS-->
-<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js"></script>
+<script src="/engineering/assets/js/tranquilpeak.js"></script>
 <!--SCRIPTS END-->
 
     <script type="text/javascript">

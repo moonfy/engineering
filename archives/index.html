@@ -28,10 +28,10 @@
     
     
     <!--STYLES-->
-    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css" type="text/css">
-    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css" type="text/css">
+    <link rel="stylesheet" href="/engineering/assets/css/font-awesome.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox.css">
+    <link rel="stylesheet" href="/engineering/assets/css/jquery.fancybox-thumbs.css">
+    <link rel="stylesheet" href="/engineering/assets/css/tranquilpeak.css">
     <!--STYLES END-->
     
 </head>
@@ -101,7 +101,7 @@
             <li class="sidebar-button">
                 
                     <a  class="sidebar-button-link st-search-show-outputs"
-                         href="/engineering/#search"
+                         href="#search"
                         
                     >
                 
@@ -113,7 +113,7 @@
             <li class="sidebar-button">
                 
                     <a  class="sidebar-button-link "
-                         href="/engineering/#about"
+                         href="#about"
                         
                     >
                 
@@ -154,6 +154,46 @@
                 
     
 <section class="postShorten-group main-content-wrap">
+    
+        
+        
+                <article class="postShorten" itemscope itemType="http://schema.org/BlogPosting">
+        
+            <div class="postShorten-wrap">
+                <div class="postShorten-header">
+                    <h1 class="postShorten-title" itemprop="headline">
+                        
+                                <a class="link-unstyled" href="/engineering/2016/09/10/js-floating-point/">JS中使用大数的问题</a>
+                        
+                    </h1>
+                    <div class="postShorten-meta">
+    <time itemprop="datePublished" content="Sat Sep 10 2016 23:00:00 GMT+0800">
+	
+		    Sep 10, 2016
+    	
+    </time>
+    
+</div>
+                </div>
+                <div class="postShorten-excerpt" itemprop="articleBody">
+                    
+                        <p>
+                            前后端大数精度不一致可能引起问题JS中Number类型以64位的双精度浮点型表示，其能表示的整数范围有限，且大于一定值时可表达的整数值不再连续。因此，如果后端传给前端一个JS中无法表达的整数值（譬如64位的大整数），则JS在存储时将寻找一个近似值代替，导致前后端保存的是不一样的值，从而在某些使用场景中出现问题，譬如作为对象的key。
+所以，后端要尽量避免传给前端大整数值，因为这个整数值前端根本用不<br>
+                    
+                    
+                        
+                            <a href="/engineering/2016/09/10/js-floating-point/" class="postShorten-excerpt_link link ">Continue reading</a>
+                            
+                        
+                    
+                    
+                        </p>
+                    
+                </div>
+            </div>
+            
+        </article>
     
         
         
@@ -393,9 +433,8 @@ Basic Authentication
                 <div class="postShorten-excerpt" itemprop="articleBody">
                     
                         <p>
-                            
-Processing Values
-One of the fundamental design principles of CSS is cascading, which allows several style sheets to influence the presentation of a document. When different declarations try to set a<br>
+                            Table of ContentsProcessing ValuesCascadingOrigin and ImportanceSpecificityExampleOrder of Appearancethe @import rulethe !important annotationDefaultingInitial ValuesInheritanceMore info
+Processing Va<br>
                     
                     
                         
@@ -434,13 +473,7 @@ One of the fundamental design principles of CSS is cascading, which allows sever
                 <div class="postShorten-excerpt" itemprop="articleBody">
                     
                         <p>
-                            
-Visual Formatting Model
-In the visual formatting model, each element in the document tree generates zero or more boxes according to the box model.
-
-The layout of these boxes is governed by:
-
-box dime<br>
+                            Table of ContentsVisual Formatting ModelViewportContaining blockInitial containing blockBox type‘display’Computed ‘display’Positioning schemesNormal flowBlock formatting contextExamplesExamplesInline <br>
                     
                     
                         
@@ -582,69 +615,6 @@ Copy lines (a synonym forco)
             
         </article>
     
-        
-        
-                <article class="postShorten" itemscope itemType="http://schema.org/BlogPosting">
-        
-            <div class="postShorten-wrap">
-                <div class="postShorten-header">
-                    <h1 class="postShorten-title" itemprop="headline">
-                        
-                                <a class="link-unstyled" href="/engineering/2014/11/03/motion-in-vim/">motion in vim</a>
-                        
-                    </h1>
-                    <div class="postShorten-meta">
-    <time itemprop="datePublished" content="Mon Nov 03 2014 18:11:45 GMT+0800">
-	
-		    Nov 03, 2014
-    	
-    </time>
-    
-</div>
-                </div>
-                <div class="postShorten-excerpt" itemprop="articleBody">
-                    
-                        <p>
-                            motion command cheat sheet单词级别的移动
-
-
-命令
-特点
-含义
-示例
-
-
-
-
-w
-exclusive
-移至右边第一个“单词首字母位置”
-Hello World! &raquo;w &raquo; Hello World!
-
-
-W
-exclusive
-移至右边第一个“非空白串首字母位置”
-(a, b) W (a, b)($par, $ext) dW ($ext)
-
-
-b
-e<br>
-                    
-                    
-                        
-                            <a href="/engineering/2014/11/03/motion-in-vim/" class="postShorten-excerpt_link link ">Continue reading</a>
-                            
-                        
-                    
-                    
-                        </p>
-                    
-                </div>
-            </div>
-            
-        </article>
-    
     <div class="pagination-bar">
     <ul class="pagination">
         
@@ -699,10 +669,10 @@ e<br>
         <div id="cover" style="background-image:url('http://res.cloudinary.com/tranquilpeak-hexo-theme/image/upload/v1438975482/v1.3.0-cover.jpg');"></div>
     </body>
     <!--SCRIPTS-->
-<script src="/engineering/assets/js/jquery.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/jquery.fancybox.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/jquery.fancybox-thumbs.js" type="text/javascript"></script>
-<script src="/engineering/assets/js/tranquilpeak.js" type="text/javascript"></script>
+<script src="/engineering/assets/js/jquery.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox.js"></script>
+<script src="/engineering/assets/js/jquery.fancybox-thumbs.js"></script>
+<script src="/engineering/assets/js/tranquilpeak.js"></script>
 <!--SCRIPTS END-->
 
 
